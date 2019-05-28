@@ -1,0 +1,136 @@
+package com.cbt.util;
+
+import java.io.IOException;
+import java.util.Properties;
+
+public class UploadAndDownloadPathUtil {  
+    private static Properties p = new Properties();  
+  
+    /** 
+     * 读取properties配置文件信息 
+     */  
+    static{  
+        try {  
+            p.load(UploadAndDownloadPathUtil.class.getClassLoader().getResourceAsStream("upLoadAndDownLoadPath.properties"));  
+        } catch (IOException e) {  
+            e.printStackTrace();   
+        }  
+    }  
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getOldDrawingUpLoadAndDownLoadPath()  
+    {  
+        return p.getProperty("oldDrawingPath");  
+    }  
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getNewDrawingUpLoadAndDownLoadPath() 
+    {  
+    	return p.getProperty("newDrawingPath");  
+    }  
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getClientOrderUpLoadAndDownLoadPath()  
+    {  
+    	return p.getProperty("clientOrderPath");  
+    }  
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getInvoiceUpLoadAndDownLoadPath()  
+    {  
+    	return p.getProperty("invoicePath");  
+    }  
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getCompressedUpLoadAndDownLoadPath()  
+    {  
+    	return p.getProperty("compressedPath");  
+    }  
+    
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getLogoAndLicensePath()  
+    {  
+    	return p.getProperty("logoAndLicensePath");  
+    }  
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getMilestonePath()  
+    {  
+    	return p.getProperty("milestone");  
+    }  
+    
+   
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getQualityPath()  
+    {  
+    	return p.getProperty("qualityPath");  
+    }  
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getRemakPicturePath()  
+    {  
+    	return p.getProperty("remark_picture_path");  
+    }  
+    
+    
+    
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getStaticQualityPath()  
+    {  
+    	return p.getProperty("static_quality_path");  
+    }  
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getStaticLogoAndLicensePath()  
+    {  
+    	return p.getProperty("static_logoAndLicense_path");  
+    }  
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getStaticMilestonePath()  
+    {  
+    	return p.getProperty("static_milestone_path");  
+    }  
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getStaticRemakPicturePath()  
+    {  
+    	return p.getProperty("static_remark_picture_path");  
+    }  
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getQuotationPath()  
+    {  
+    	return p.getProperty("quotation_path");  
+    }  
+    /** 
+     * 根据key得到value的值 
+     */  
+    public static String getStaticQuoteImgPath()  
+    {  
+    	return p.getProperty("static_quote_img_path");  
+    }  
+    
+}  
+	
+	
+
+
+

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.OrderMessageDao">
+
+	<resultMap id="OrderMessageResultMap" type="com.cbt.entity.OrderMessage">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="message_center_id" property="messageCenterId" jdbcType="INTEGER" />
+		<result column="message_details" property="messageDetails" jdbcType="VARCHAR" />
+		<result column="message_send_time" property="messageSendTime" jdbcType="TIMESTAMP" />
+		<result column="pic_status" property="picStatus" jdbcType="INTEGER" />
+		<result column="customer_or_factory" property="customerOrFactory" jdbcType="INTEGER" />
+		<result column="factory_id" property="factoryId" jdbcType="VARCHAR" />
+		<result column="sales_id" property="salesId" jdbcType="VARCHAR" />
+		<result column="read_status" property="readStatus" jdbcType="INTEGER" />
+		<result column="message_read_time" property="messageReadTime" jdbcType="TIMESTAMP" />
+		<result property="targetPriceReply" column="target_price_reply" jdbcType="INTEGER"/>
+		<result property="attachmentPath" column="attachment_path" jdbcType="VARCHAR"/>
+		
+<!-- 		虚拟字段 -->
+		<result column="username" property="username" jdbcType="TIMESTAMP" />
+		<result property="loginEmail" column="login_email" jdbcType="VARCHAR"/>
+	</resultMap> 
+	
+	
+
+    <sql id="OrderMessageColumnList">
+	    id,message_center_id,message_details,message_send_time,
+	    pic_status,customer_or_factory,factory_id,sales_id,read_status,
+	    message_read_time,target_price_reply,attachment_path
+    </sql>
+    
+	<!-- 根据消息中心ID查询消息 -->
+    <select id="queryByMessageCenterId" resultMap="OrderMessageResultMap" parameterType="int">
+          select o.*,b.username from 
+             order_message o 
+                left JOIN
+              back_user b
+                 on
+              o.sales_id = b.backuserId 
+          where message_center_id = #{messageCenterId,jdbcType=INTEGER} 
+          order by message_send_time 
+    </select>
+    
+	<!-- 根据消息中心ID查询客户的消息 -->
+    <select id="queryByMessageCenterIdAndType" resultMap="OrderMessageResultMap">
+          select
+          <include refid="OrderMessageColumnList"/>
+          from order_message
+          where message_center_id = #{messageCenterId,jdbcType=INTEGER}
+          and customer_or_factory = #{customerOrFactory,jdbcType=INTEGER} 
+          order by message_send_time 
+    </select>
+
+
+    <select id="queryByQuotationId" resultMap="OrderMessageResultMap" parameterType="int">
+          select o.*,ms.quotation_info_id,ms.login_email from 
+          (
+          select m.id,m.quotation_info_id,user.login_email from
+          message_center m left join user on m.userid = user.userid
+          )ms 
+          left join
+          order_message o
+          on 
+          ms.id = o.message_center_id where ms.quotation_info_id = #{quotationInfoId,jdbcType=INTEGER} 
+          order by o.message_send_time desc
+    </select>  
+
+    <!-- 根据id查询消息 -->
+    <select id="queryById" parameterType="int" resultMap="OrderMessageResultMap">
+          select 
+          <include refid="OrderMessageColumnList"/>
+          from order_message 
+          where id = #{id,jdbcType=INTEGER}          
+    </select>
+
+
+      <!-- 插入消息 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+      insert into order_message
+       (
+        message_center_id,message_details,message_send_time,
+	    pic_status,customer_or_factory,factory_id,sales_id,read_status,
+	    target_price_reply,attachment_path
+	   )
+       values
+       (
+       #{messageCenterId,jdbcType=INTEGER},
+       #{messageDetails,jdbcType=VARCHAR},
+       #{messageSendTime,jdbcType=TIMESTAMP},
+       #{picStatus,jdbcType=INTEGER},
+       #{customerOrFactory,jdbcType=INTEGER},
+       #{factoryId,jdbcType=VARCHAR},
+       #{salesId,jdbcType=VARCHAR},
+       #{readStatus,jdbcType=INTEGER},
+       #{targetPriceReply,jdbcType=INTEGER},     
+       #{attachmentPath,jdbcType=VARCHAR}   
+       )      
+    </insert>	
+       
+	
+	
+	
+	 <!-- 批量更新消息读取状态 -->	
+	<update id="updateReadStatus" parameterType="java.util.List">    
+     <foreach collection="list" item="item" index="index"  open="" close="" separator=";">   
+     	    update order_message  
+     	    <set>     
+			read_status = #{item.readStatus},message_read_time = #{item.messageReadTime}
+			</set> 
+            where id = #{item.id}            
+     </foreach>  
+     
+    </update> 
+	
+	  
+</mapper>

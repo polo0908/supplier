@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.InvoiceProductDao">
+
+	<resultMap id="InvoiceProductResultMap" type="com.cbt.entity.InvoiceProduct">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="invoice_id" property="invoiceId" jdbcType="VARCHAR" />
+		<result column="product_name" property="productName" jdbcType="VARCHAR" />
+		<result column="unit_price" property="unitPrice" jdbcType="DOUBLE" />
+		<result column="quantity" property="quantity" jdbcType="INTEGER" />
+		<result column="mold_price" property="moldPrice" jdbcType="DOUBLE" />
+	</resultMap>
+
+	<sql id="InvoiceProductColumnList">
+		id, invoice_id, product_name, unit_price,quantity,mold_price
+	</sql>
+
+	<!-- 批量插入数据 -->
+	<insert id="insertInvoiceProduct" parameterType="java.util.List">
+		insert into invoice_product
+		(
+		invoice_id, product_name, unit_price,quantity,mold_price
+		)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(
+			#{item.invoiceId},#{item.productName},#{item.unitPrice},
+			#{item.quantity},#{item.moldPrice}
+			)
+		</foreach>
+	</insert>
+
+	<!-- 根据invoiceId获取InvoiceProduct数据 -->
+	<select id="queryByInvoiceId" resultMap="InvoiceProductResultMap"
+		parameterType="string">
+		select
+		<include refid="InvoiceProductColumnList" />
+		from invoice_product
+		where invoice_id = #{invoiceId,jdbcType=VARCHAR}
+
+	</select>
+
+	<!-- 根据 InvoiceProductId获取InvoiceProduct数据 -->
+	<select id="queryById" resultMap="InvoiceProductResultMap"
+		parameterType="int">
+		select
+		<include refid="InvoiceProductColumnList" />
+		from invoice_product
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+
+	<!-- 根据 InvoiceId删除InvoiceProduct数据 -->
+	<delete id="deleteByInvoiceId" parameterType="string">
+		delete from
+		invoice_product
+		where invoice_id = #{invoiceId,jdbcType=VARCHAR}
+	</delete>
+
+	<!-- 根据 ProductId删除InvoiceProduct数据 -->
+	<delete id="deleteById" parameterType="int">
+		delete from
+		invoice_product
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+
+</mapper>

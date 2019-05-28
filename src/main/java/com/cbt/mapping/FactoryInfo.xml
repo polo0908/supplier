@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.FactoryInfoDao">
+
+	<resultMap id="FactoryInfoResultMap" type="com.cbt.entity.FactoryInfo">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="factory_id" property="factoryId" jdbcType="VARCHAR" />
+		<result column="factory_name" property="factoryName" jdbcType="VARCHAR" />
+		<result column="factory_logo" property="factoryLogo" jdbcType="VARCHAR" />
+		<result column="factory_license" property="factoryLicense" jdbcType="VARCHAR" />
+		<result column="factory_admin_name" property="factoryAdminName" jdbcType="VARCHAR" />
+		<result column="factory_admin_email" property="factoryAdminEmail" jdbcType="VARCHAR" />
+		<result column="factory_admin_tel" property="factoryAdminTel" jdbcType="VARCHAR" />
+		<result column="factory_admin_pwd" property="factoryAdminPwd" jdbcType="VARCHAR" />
+		<result column="register_time" property="registerTime" jdbcType="TIMESTAMP" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="factory_addr" property="factoryAddr" jdbcType="VARCHAR" />
+		<result column="main_business" property="mainBusiness" jdbcType="VARCHAR" />
+		<result column="country" property="country" jdbcType="VARCHAR" />
+		<result column="establishment_date" property="establishmentDate" jdbcType="DATE" />
+		<result column="factory_number" property="factoryNumber" jdbcType="VARCHAR" />
+		<result column="website" property="website" jdbcType="VARCHAR" />
+	</resultMap> 
+
+    <sql id="FactoryInfoColumnList">
+    id,factory_id,factory_name,factory_logo,factory_license,factory_admin_name,factory_admin_email,
+    factory_admin_tel,factory_admin_pwd,register_time,update_time,factory_addr,main_business,country,
+    establishment_date,factory_number,website
+    </sql>
+
+
+        <!-- 根据factoryId查询 -->
+    <select id="queryByFactoryId" resultMap="FactoryInfoResultMap" parameterType="string">
+          select  
+          <include refid="FactoryInfoColumnList"/>
+          from factory_info where factory_id = #{factoryId,jdbcType=VARCHAR}       
+    </select>
+        <!-- 根据factoryName查询 -->
+    <select id="queryByFactoryName" resultMap="FactoryInfoResultMap" parameterType="string">
+          select  
+          <include refid="FactoryInfoColumnList"/>
+          from factory_info where factory_name = #{factoryName,jdbcType=VARCHAR}       
+    </select>
+    
+    <!-- 根据email进行查询 -->
+    <select id="queryByEmail" resultMap="FactoryInfoResultMap" parameterType="string">
+          select  
+          <include refid="FactoryInfoColumnList"/>
+          from factory_info where factory_admin_email = #{factoryAdminEmail,jdbcType=VARCHAR}       
+    </select>
+	
+	 <!-- 插入工厂数据 -->
+	<insert id="insert" parameterType="com.cbt.entity.FactoryInfo" useGeneratedKeys="true" keyProperty="id">
+	   insert into factory_info
+	   (
+	   id,factory_id,factory_name,factory_logo,
+	   factory_license,factory_admin_name,factory_admin_email,
+       factory_admin_tel,factory_admin_pwd,register_time,
+       update_time,factory_addr,main_business 	   
+	   )
+	   values
+	   (
+	   #{id,jdbcType=INTEGER},
+	   #{factoryId,jdbcType=VARCHAR},
+	   #{factoryName,jdbcType=VARCHAR},
+	   #{factoryLogo,jdbcType=VARCHAR},
+	   #{factoryLicense,jdbcType=VARCHAR},
+	   #{factoryAdminName,jdbcType=VARCHAR},
+	   #{factoryAdminEmail,jdbcType=VARCHAR},
+	   #{factoryAdminTel,jdbcType=VARCHAR},
+	   #{factoryAdminPwd,jdbcType=VARCHAR},
+	   #{registerTime,jdbcType=TIMESTAMP},	   
+	   #{updateTime,jdbcType=TIMESTAMP},	   
+	   #{factoryAddr,jdbcType=VARCHAR},
+	   #{mainBusiness,jdbcType=VARCHAR}	   
+	   )	
+	
+	</insert>
+	
+	 <!-- 插入工厂数据 -->
+	<insert id="updateFactoryInfo" parameterType="com.cbt.entity.FactoryInfo">
+	  update factory_info
+	  <set> 
+	    <if test="factoryName != null">
+			factory_name = #{factoryName,jdbcType=VARCHAR},
+		</if>
+	    <if test="factoryAdminName != null">
+			factory_admin_name = #{factoryAdminName,jdbcType=VARCHAR},
+		</if>
+	    <if test="factoryLogo != null">
+			factory_logo = #{factoryLogo,jdbcType=VARCHAR},
+		</if>
+	    <if test="factoryLicense != null">
+			factory_license = #{factoryLicense,jdbcType=VARCHAR},
+		</if>
+	    <if test="factoryAdminTel != null">
+			factory_admin_tel = #{factoryAdminTel,jdbcType=VARCHAR},
+		</if>
+	    <if test="factoryAddr != null">
+			factory_addr = #{factoryAddr,jdbcType=VARCHAR},
+		</if>
+	    <if test="establishmentDate != null">
+			establishment_date = #{establishmentDate,jdbcType=DATE},
+		</if>
+	    <if test="country != null">
+			country = #{country,jdbcType=VARCHAR},
+		</if>
+	    <if test="factoryNumber != null">
+			factory_number = #{factoryNumber,jdbcType=VARCHAR},
+		</if>
+	    <if test="mainBusiness != null">
+			main_business = #{mainBusiness,jdbcType=VARCHAR},
+		</if>
+	    <if test="website != null">
+			website = #{website,jdbcType=VARCHAR},
+		</if>
+	  </set>
+	    where id = #{id,jdbcType=INTEGER}  
+	
+	</insert>
+	
+</mapper>

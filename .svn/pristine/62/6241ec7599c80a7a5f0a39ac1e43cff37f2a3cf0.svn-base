@@ -1,0 +1,337 @@
+<%@page import="java.util.List"%>
+<%@page import="com.cbt.entity.BackUser"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
+<%@page import="com.cbt.util.WebCookie"%>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+
+<%
+	List<BackUser> backUserList = (List<BackUser>) request.getAttribute("backUserList");
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>ImportX</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link rel="stylesheet" href="/supplier/css/bootstrap.min.css" />
+<link rel="stylesheet"
+	href="/supplier/css/bootstrap-responsive.min.css" />
+<link rel="stylesheet" href="/supplier/css/matrix-style.css" />
+<link rel="stylesheet" href="/supplier/css/matrix-media.css" />
+<link rel="stylesheet" href="/supplier/css/select2.css" />
+<link href="/supplier/font-awesome/css/font-awesome.css"
+	rel="stylesheet" />
+<link type='image/x-ico' rel='icon' href='/supplier/img/favicon.ico' />
+<link rel="stylesheet" href="/supplier/css/easydialog.css" />
+
+
+<script type="text/javascript" src="/supplier/js/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="/supplier/js/easydialog.min.js"></script>
+<script type="text/javascript">
+	
+	var pageSize = '<%=request.getParameter("pageSize")%>';
+	
+	$(function(){
+		
+		$('#sidebar').find('li').eq(3).addClass('active');	
+
+		if(pageSize !=null && parseFloat(pageSize)!= "NaN" && pageSize != ''){
+			$("#pageSize").find("option[value='"+pageSize+"']").attr("selected",true);
+		}
+		
+		
+	});
+	
+
+	function doQuery(){
+		var info = $("#queryinfo").val();
+		var pageSize = $("#pageSize").val();
+		var param ="";
+		if(!(info ==null || info == "") && !(pageSize ==null || pageSize == "")){
+			param = "info=" + info + "&pageSize=" + pageSize;	
+		} else if(!(info ==null || info == "")){
+			param = "info=" + info;	
+		} else if(!(pageSize ==null || pageSize == "")){
+			param = "pageSize=" + pageSize;
+		}
+		if(param.length ==0){
+			window.location.href = "/supplier/backUser/queryBackUserList.do";
+		} else {
+			window.location.href = "/supplier/backUser/queryBackUserList.do?" + param;
+		}
+	}
+	
+	function doUpdate(id){
+		window.location.href = "/supplier/backUser/jumpToUpdateBackUser.do?id=" + id;	
+	}
+	function doCreate(){
+		window.location.href = "/supplier/backUser/jumpToAddBackUser.do";	
+	}
+	
+	function doDelete(id){
+		
+		if(confirm("是否确定删除？")){
+			$.ajax({
+				type : "post",
+				datatype : "json",
+				url : "/supplier/backUser/deleteBackUser.do",
+				data : {
+					"id" : id
+				},
+				success : function(data) {
+					easyDialog.open({
+						container : {
+						    header : 'Prompt message',
+							content : '提交成功'
+						},
+						overlay : false,
+						autoClose : 1000
+					});
+					window.location.reload();
+				},
+				error : function() {
+					easyDialog.open({
+						container : {
+						    header : 'Prompt message',
+							content : '提交失败，请重试'
+						},
+						overlay : false,
+						autoClose : 1000
+					});
+				}
+			});			
+		}
+	}
+	
+</script>
+<style>
+.shuruming {
+	margin-top: 20px;
+	float: none;
+	text-shadow: 0 1px 0 #ffffff;
+	margin-left: 20px;
+	/* 	position: relative; */
+}
+
+.shuru  input {
+	width: 15%;
+}
+
+.dataTables_length label {
+	float: left;
+}
+
+.dataTables_length .div-label {
+	float: left;
+	margin-left: 0.625em;
+}
+
+.dataTables_length .select2-container {
+	float: left;
+	margin-left: 0.625em;
+	margin-bottom: 0.3em;
+}
+</style>
+</head>
+<body>
+
+<jsp:include page="base.jsp"></jsp:include>
+
+	<!--sidebar-menu-->
+
+	<!--main-container-part-->
+	<div id="content">
+		<div id="content-header">
+			<div id="breadcrumb">
+				<a href="/supplier/backUser/queryBackUserList.do" class="tip-bottom"><i class="icon icon-user"></i>用户管理</a>
+				<a href="#" class="current"></a>
+			</div>
+			<div class="shuru">
+				<div class="shuruming">
+					<input id="queryinfo" type="text" class="span11"
+						value="" placeholder="用户名称" style="width: 25%;">
+					<button class="btn btn-info btn-left"
+						style="padding: 4px 20px; left: 35%;" onclick="doQuery()">查询</button>
+					<button class="btn btn-info btn-left"
+ 						style="padding: 4px 20px; left: 41%;" onclick="doCreate()">添加用户</button>
+
+				</div>
+			</div>
+			<div class="container-fluid">
+				<hr>
+				<div class="row-fluid">
+					<div class="span12">
+						<div class="widget-box">
+
+							<div class="widget-content nopadding">
+								<div id="DataTables_Table_0_wrapper" class="dataTables_wrapper"
+									role="grid">
+									<div class="">
+										<div id="DataTables_Table_0_length" class="dataTables_length">
+											<label>Show </label> <select id="pageSize"
+												class="select2-container" name="pageSize"
+												onchange="doQuery()">
+												<option value="10">10</option>
+												<option value="25">25</option>
+												<option value="50">50</option>
+												<option value="100">100</option>
+											</select> <label class="div-label">entries</label>
+										</div>
+									</div>
+									<table class="table table-bordered data-table dataTable"
+										id="DataTables_Table_0">
+										<thead>
+											<tr role="row">
+												<th class="ui-state-default" role="columnheader"
+													tabindex="0" aria-controls="DataTables_Table_0" rowspan="1"
+													colspan="1" aria-sort="ascending"
+													aria-label="Rendering engine: activate to sort column descending">
+													<div class="DataTables_sort_wrapper">
+														ID <span
+															class="DataTables_sort_icon css_right ui-icon ui-icon-triangle-1-n"></span>
+													</div>
+												</th>
+												<th class="ui-state-default" role="columnheader"
+													tabindex="0" aria-controls="DataTables_Table_0" rowspan="1"
+													colspan="1"
+													aria-label="Browser: activate to sort column ascending">
+													<div class="DataTables_sort_wrapper">
+														用户名 <span
+															class="DataTables_sort_icon css_right ui-icon ui-icon-carat-2-n-s"></span>
+													</div>
+												</th>
+												<th class="ui-state-default" role="columnheader"
+													tabindex="0" aria-controls="DataTables_Table_0" rowspan="1"
+													colspan="1"
+													aria-label="Platform(s): activate to sort column ascending">
+													<div class="DataTables_sort_wrapper">
+														姓名 <span
+															class="DataTables_sort_icon css_right ui-icon ui-icon-carat-2-n-s"></span>
+													</div>
+												</th>
+												<th class="ui-state-default" role="columnheader"
+													tabindex="0" aria-controls="DataTables_Table_0" rowspan="1"
+													colspan="1"
+													aria-label="Engine version: activate to sort column ascending">
+													<div class="DataTables_sort_wrapper">
+														联系电话 <span
+															class="DataTables_sort_icon css_right ui-icon ui-icon-carat-2-n-s"></span>
+													</div>
+												</th>
+												<th class="ui-state-default" role="columnheader"
+													tabindex="0" aria-controls="DataTables_Table_0" rowspan="1"
+													colspan="1"
+													aria-label="Engine version: activate to sort column ascending">
+													<div class="DataTables_sort_wrapper">
+														备注 <span
+															class="DataTables_sort_icon css_right ui-icon ui-icon-carat-2-n-s"></span>
+													</div>
+												</th>
+												<th class="ui-state-default" role="columnheader"
+													tabindex="0" aria-controls="DataTables_Table_0" rowspan="1"
+													colspan="1"
+													aria-label="Engine version: activate to sort column ascending">
+													<div class="DataTables_sort_wrapper">
+														创建时间 <span
+															class="DataTables_sort_icon css_right ui-icon ui-icon-carat-2-n-s"></span>
+													</div>
+												</th>
+												<th class="ui-state-default" role="columnheader"
+													tabindex="0" aria-controls="DataTables_Table_0" rowspan="1"
+													colspan="1"
+													aria-label="Engine version: activate to sort column ascending">
+													<div class="DataTables_sort_wrapper">
+														用户权限 <span
+															class="DataTables_sort_icon css_right ui-icon ui-icon-carat-2-n-s"></span>
+													</div>
+												</th>
+												<th class="ui-state-default" role="columnheader"
+													tabindex="0" aria-controls="DataTables_Table_0" rowspan="1"
+													colspan="1"
+													aria-label="Engine version: activate to sort column ascending"
+													style="width: 270px;">
+													<div class="DataTables_sort_wrapper">
+														操作 <span
+															class="DataTables_sort_icon css_right ui-icon ui-icon-carat-2-n-s"></span>
+													</div>
+												</th>
+											</tr>
+										</thead>
+
+										<%
+											for (int i = 0; i < backUserList.size(); i++) {
+												if (i % 2 == 0) {
+										%>
+										<tr class="gradeA even">
+											<td><%=i+1%></td>
+											<td><%=backUserList.get(i).getUserName() == null ? "" : backUserList.get(i).getUserName()%></td>
+											<td><%=backUserList.get(i).getRealName() == null ? "" : backUserList.get(i).getRealName()%></td>
+											<td><%=backUserList.get(i).getTel() == null ? "" : backUserList.get(i).getTel()%></td>
+											<td><%=backUserList.get(i).getRemark() == null ? "" : backUserList.get(i).getRemark()%></td>
+											<td><%=backUserList.get(i).getCreateTime() == null ? "" : backUserList.get(i).getCreateTime()%></td>
+											<td><%=backUserList.get(i).getPermission() != 1 ? "普通用户" : "管理员"%></td>
+											<td class="center">
+												<button class="btn btn-primary"
+												onclick="doUpdate(<%=backUserList.get(i).getId()%>)">编辑</button>
+												<button class="btn btn-danger" style="margin-left: 10px;"
+             									onclick="doDelete(<%=backUserList.get(i).getId()%>)">删除</button>
+											</td>
+										</tr>
+										<%
+											} else {
+										%>
+										<tbody role="alert" aria-live="polite" aria-relevant="all">
+											<tr class="gradeA odd">
+												<td><%=i+1%></td>
+												<td><%=backUserList.get(i).getUserName() == null ? "" : backUserList.get(i).getUserName()%></td>
+												<td><%=backUserList.get(i).getRealName() == null ? "" : backUserList.get(i).getRealName()%></td>
+												<td><%=backUserList.get(i).getTel() == null ? "" : backUserList.get(i).getTel()%></td>
+												<td><%=backUserList.get(i).getRemark() == null ? "" : backUserList.get(i).getRemark()%></td>
+												<td><%=backUserList.get(i).getCreateTime() == null ? "" : backUserList.get(i).getCreateTime()%></td>
+												<td><%=backUserList.get(i).getPermission() != 1 ? "普通用户" : "管理员"%></td>
+											<td class="center">
+												<button class="btn btn-primary"
+														onclick="doUpdate(<%=backUserList.get(i).getId()%>)">编辑</button>
+												<button class="btn btn-danger" style="margin-left: 10px;"
+                                                  	onclick="doDelete(<%=backUserList.get(i).getId()%>)">删除</button>
+												</td>
+											</tr>
+											<%
+												}
+												}
+											%>
+
+										</tbody>
+									</table>
+
+									<div
+										class="fg-toolbar ui-toolbar ui-widget-header ui-corner-bl ui-corner-br ui-helper-clearfix">
+										<div class="dataTables_filter" id="DataTables_Table_0_filter">
+										</div>
+										<div
+											class="dataTables_paginate fg-buttonset ui-buttonset fg-buttonset-multi ui-buttonset-multi paging_full_numbers"
+											id="DataTables_Table_0_paginate">${pager2}</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--end-main-container-part-->
+
+	<!--Footer-part-->
+
+	<div class="row-fluid">
+		<div id="footer" class="span12">
+
+		</div>
+	</div>
+</body>
+</html>

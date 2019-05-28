@@ -1,0 +1,167 @@
+.bianhaolan{
+    margin-top: 20px;
+    float: none;
+    text-shadow: 0 1px 0 #ffffff;
+    margin-left: 20px;
+    position: relative;
+}
+.bianhaolan .bianhao{
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+    float: left;
+    margin-left: 8%;
+}
+.bianhaolan .fapiao,.bianhaolan .jine{
+    float: left;
+  /*  margin-left: 8%;*/
+}
+.bianhaolan .fapiao>input,.bianhaolan .jine>select{
+    margin-top: -5px;
+    margin-left: 7px;
+    margin-bottom: 20px;
+}
+.bianhaolan .fapiao>label{
+    float: left;
+}
+.bianhaolan .jine>label{
+    float: left;
+}
+.div-left{
+    float: left;
+}
+.div-left span{
+    font-size: 14px;
+    color:#d14;
+}
+.gradeA>td{
+    text-align: center;
+}
+.widget-box{
+    margin-top:0px ;
+}
+.controls>span{
+    color:#d14;
+}
+.bianhaolan{
+    width: 100%;
+}
+.control-group:before, .control-group:after{
+    display: table;
+    line-height: 0;
+    content: "";
+}
+.control-label {
+    padding-top: 15px;
+    /* width: 180px;*/
+    float: left;
+    text-align: right;
+}
+.controls {
+    margin-left: 90px;
+    padding: 10px 0;
+}
+/*
+div.uploader span.action{
+    background-color: transparent;
+}*/
+.uploader input{
+    display: inline-block;
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+div.uploader span.action{
+    background-color: #eee;
+}
+.control-group{
+    margin-bottom: 0px;
+}
+.pull-right{
+    float: left;
+    margin-top: 30px;
+}
+.pull-right a{
+    padding: 10px 30px;
+}
+.span .span-p1,.span-p2{
+    margin: 10px 0;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 16px;
+    /* float: left;*/
+    line-height: 20px;
+    color: inherit;
+    text-rendering: optimizelegibility;
+}
+.span .span-p2{
+    float: left;
+    display: inline-block;
+}
+.tbody-td td{
+    text-align: center;
+}
+.fluid-div{
+    width: 50%;
+}
+.div-span{
+    margin-top: 10px;
+    float: none;
+    text-shadow: 0 1px 0 #ffffff;
+    position: relative;
+}
+.div-span .bianhao {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+    float: left;
+}
+.div-span .bianhao2 {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+    float: left;
+    margin-left:5%;
+}
+.pull-right{
+    float: right;
+}
+.waimian{
+    padding: 20px;
+    margin-top: 20px;
+}
+.div-label2{
+    width: 30%;
+}
+.div-con{
+    width: 70%;
+}
+.con-p{
+    font-size: 14px;
+}
+.div-labe6 {
+    width: 40%;
+}
+
+.cont-label {
+    font-weight: bold;
+    padding-top: 10px;
+    /* width: 180px; */
+    float: left;
+    text-align: right;
+}
+/*.div-controls{
+    width: 70%;
+}*/
+
+.con {
+    text-align: left;
+    margin-left:50%;
+    padding: 10px 0;
+}
+.waimian2 {
+    font-size: 14px;
+    padding: 20px;
+    margin-top: 20px;
+}

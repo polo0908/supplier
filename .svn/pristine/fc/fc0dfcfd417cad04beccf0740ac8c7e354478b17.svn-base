@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.AmountUnitDao">
+
+	<resultMap id="AmountUnitResultMap" type="com.cbt.entity.AmountUnit">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="currency" property="currency" jdbcType="VARCHAR" />
+		<result column="currency_shorthand" property="currencyShorthand" jdbcType="VARCHAR" />
+		<result column="exchange_rate" property="exchangeRate" jdbcType="DOUBLE" />
+	</resultMap> 
+
+	    <!-- 查询所有币种 -->
+    <select id="queryAmountUnit" resultMap="AmountUnitResultMap">
+          select * from amount_unit    
+    </select>
+
+        <!-- 根据id查询 -->
+    <select id="queryById" resultMap="AmountUnitResultMap" parameterType="int">
+          select * from amount_unit where id = #{id,jdbcType=INTEGER}       
+    </select>
+	
+	    <!-- 根据货币缩写查询-->
+	<select id="queryByCurrencyShorthand" resultMap="AmountUnitResultMap" parameterType="string">
+	      select * from amount_unit where currency_shorthand = #{currencyShorthand,jdbcType=VARCHAR}   
+	</select>
+	
+	<update id="updateRate" parameterType="com.cbt.entity.AmountUnit">
+	      update 
+	      amount_unit 
+	      <set> 
+	      <if test="exchangeRate != null">
+			exchange_rate = #{exchangeRate,jdbcType=DOUBLE},
+		 </if>
+		 </set>
+		 where id = #{id,jdbcType=INTEGER} 
+	</update>
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.PaymentPlanDao">
+
+	<resultMap id="PaymentPlanResultMap" type="com.cbt.entity.PaymentPlan">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="order_id" property="orderId" jdbcType="VARCHAR" />
+		<result column="invoice_id" property="invoiceId" jdbcType="VARCHAR" />
+		<result column="payment_bank" property="paymentBank" jdbcType="INTEGER" />
+		<result column="payment_time" property="paymentTime" jdbcType="DATE" />
+		<result column="amount" property="amount" jdbcType="DOUBLE" />
+		<result column="amount_actual" property="amountActual" jdbcType="DOUBLE" />
+		<result column="predict_payment_time" property="predictPaymentTime" jdbcType="DATE" />
+	</resultMap> 
+
+	<sql id="PaymentPlanColumnList">
+		id, order_id, invoice_id,payment_bank, payment_time, amount, amount_actual,predict_payment_time
+	</sql>
+	
+     <!-- 单条插入PaymentPlan数据 -->
+	<insert id="insertPaymentPlan" parameterType="com.cbt.entity.PaymentPlan">
+	    insert into payment_plan 
+		    (
+		    invoice_id,order_id,
+			payment_bank, payment_time, amount,amount_actual,predict_payment_time
+            )
+	    values	    
+	      (          
+		    #{invoiceId,jdbcType=VARCHAR}, 
+		    #{orderId,jdbcType=VARCHAR},	  
+		    #{paymentBank,jdbcType=VARCHAR},
+		    #{paymentTime,jdbcType=DATE},
+		    #{amount,jdbcType=DOUBLE},
+		    #{amountActual,jdbcType=DOUBLE},
+		    #{predictPaymentTime,jdbcType=DATE}
+	      )
+
+	</insert>
+    
+    <!-- 批量插入数据 -->
+	<insert id="insertPaymentPlans" parameterType="java.util.List">
+	    insert into payment_plan 
+		    (
+		    order_id, invoice_id,payment_bank, payment_time, amount,amount_actual,predict_payment_time
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.orderId},#{item.invoiceId},#{item.paymentBank},#{item.paymentTime},
+		    #{item.amount},#{item.amountActual}, #{item.predictPaymentTime}
+	      )
+	    </foreach>
+	  </insert>
+	<!-- 根据发票编号查询付款计划 -->
+	<select id="queryPaymentPlan" parameterType="string" resultMap="PaymentPlanResultMap">
+	    select 
+	    <include refid="PaymentPlanColumnList"/>
+	    from payment_plan  
+	    where invoice_id = #{invoiceId,jdbcType=VARCHAR}
+	
+	</select>
+	
+	<!-- 查询 第一次付款日期-->
+	<select id="selectFirstPayment" parameterType="string" resultType="string">
+	 select payment_time  
+	 from payment_plan 
+	 where order_id = #{orderId,jdbcType=VARCHAR}  ORDER BY payment_time LIMIT 0,1	
+	</select>
+	
+	
+	<!-- 查询付款计划最晚时间 -->
+	<select id="queryLastPaymentTime" parameterType="string" resultType="string">
+	    select 
+	    max(payment_time)  
+	    from payment_plan  
+	    where invoice_id = #{invoiceId,jdbcType=VARCHAR} 
+	
+	</select>
+    
+	<delete id="deleteByInvoiceId" parameterType="string">
+	    delete from payment_plan 	    
+	    where invoice_id = #{invoiceId,jdbcType=VARCHAR} 
+	</delete>
+</mapper>

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.ReOrderDao">
+
+	<resultMap id="ReOrderResultMap" type="com.cbt.entity.ReOrder">
+	   
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="userid" property="userid" jdbcType="VARCHAR" />
+<!-- 		<result column="invoice_id" property="invoiceId" jdbcType="VARCHAR" /> -->
+		<result column="required_time" property="requiredTime" jdbcType="DATE" />
+		<result column="comments" property="comments" jdbcType="VARCHAR" />
+		<result column="reOrder_state" property="reOrderState" jdbcType="INTEGER" />
+		<result column="total_amount" property="totalAmount" jdbcType="DOUBLE" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="follow_up" property="followUp" jdbcType="VARCHAR" />       
+        <result column="follow_time" property="followTime" jdbcType="TIMESTAMP" />
+		<result column="follow_comment" property="followComment" jdbcType="VARCHAR" />
+		<result column="history_id" property="historyId" jdbcType="INTEGER" />
+		<result column="username" property="userName" jdbcType="VARCHAR" />
+		<result column="factory_id" property="factoryId" jdbcType="VARCHAR" />	
+		
+		<association property="saleCustomer" javaType="com.cbt.entity.SaleCustomer">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="salesId" property="salesId" jdbcType="VARCHAR" />
+		<result column="userid" property="userid" jdbcType="VARCHAR" />
+	    </association> 
+	</resultMap>
+	
+     
+
+	<sql id="ReOrderColumnList">
+		id, userid, 
+		required_time, comments, reOrder_state,  
+		total_amount, create_time, follow_up, follow_time, 
+		follow_comment, history_id, factory_id
+	</sql>
+
+		<!-- 根据userName、userId、时间节点查询订单 -->
+    <select id="queryAllReOrder" resultMap="ReOrderResultMap"
+		parameterType="com.cbt.entity.ReOrderQuery">
+		select f.* from 
+			(
+			  select d.* ,concat_ws ('', userid, username) as t from 
+					(
+					  select c.*, u.username as username  from reorder c  left join user u on c.userid = u.userid order by c.create_time desc
+					 ) d  
+			 ) f 
+	 
+		    INNER JOIN 
+			(select s.userid from sale_customer s LEFT JOIN back_user b on b.backuserId = s.salesId where s.salesId = #{salesId,jdbcType=VARCHAR}  and factory_id = #{factoryId,jdbcType=VARCHAR} )q 
+			on 
+			f.userid = q.userid 					
+		    where f.reOrder_state != 3 
+			<if test="userName !=null and userName !='' ">
+				and t like '%${userName}%'
+			</if>
+			<if test="beginDate !=null and beginDate != '' ">
+				and Date(create_time) &gt;= Date(#{beginDate,jdbcType=TIMESTAMP})
+			</if>
+			<if test="endDate !=null and beginDate != '' ">
+				and Date(create_time) &lt;= Date(#{endDate,jdbcType=TIMESTAMP})
+			</if>       			
+		  limit #{start}, #{pageSize}
+
+	</select>
+	
+	 <!-- 动态查询图纸总数 -->
+    <select id="totalAmount" resultType="int" parameterType="com.cbt.entity.ReOrderQuery">
+       
+         select count(*) from 
+                   (select f.* from 
+						(
+						  select d.* ,concat_ws ('', userid, username) as t from 
+							  (
+								select c.*, u.username as username  from reorder c  LEFT JOIN user u on c.userid = u.userid 
+							  ) d  
+					    ) f 
+				   INNER JOIN 
+				   (select s.userid from sale_customer s LEFT JOIN back_user b on b.backuserId = s.salesId where s.salesId = #{salesId,jdbcType=VARCHAR}  and factory_id = #{factoryId,jdbcType=VARCHAR} )q 
+				   on 
+				   f.userid = q.userid 					
+				   where  f.reOrder_state != 3 
+			<if test="userName !=null and userName !='' ">
+				and t like '%${userName}%'
+			</if>
+			<if test="beginDate !=null and beginDate != '' ">
+				and Date(create_time) &gt;= Date(#{beginDate,jdbcType=TIMESTAMP})
+			</if>
+			<if test="endDate !=null and beginDate != '' ">
+				and Date(create_time) &lt;= Date(#{endDate,jdbcType=TIMESTAMP})
+			</if>
+			
+        ) cd			
+    </select>
+    
+    
+		<!-- 根据userName、userId、时间节点查询订单(管理员查询) -->
+    <select id="queryAllReOrderAdmin" resultMap="ReOrderResultMap" parameterType="com.cbt.entity.ReOrderQuery">
+    select * from (
+		select d.* ,concat_ws ('', userid, username) as t from 
+					(
+					  select c.*, u.username as username  from reorder c  left join user u on c.userid = u.userid order by c.create_time desc
+					 ) d
+			     )f		    	    
+		   where 
+		   factory_id = #{factoryId,jdbcType=VARCHAR} and f.reOrder_state != 3 
+		   and  
+		   EXISTS(select permission from back_user where backuserId = #{salesId,jdbcType=VARCHAR} and permission=1)
+			<if test="userName !=null and userName !='' ">
+				and t like '%${userName}%'
+			</if>
+			<if test="beginDate !=null and beginDate != '' ">
+				and Date(create_time) &gt;= Date(#{beginDate,jdbcType=TIMESTAMP})
+			</if>
+			<if test="endDate !=null and beginDate != '' ">
+				and Date(create_time) &lt;= Date(#{endDate,jdbcType=TIMESTAMP})
+			</if>       			
+		  limit #{start}, #{pageSize}
+
+	</select>
+	
+	 <!-- 动态查询图纸总数(管理员查询)-->
+    <select id="totalAmountAdmin" resultType="int" parameterType="com.cbt.entity.ReOrderQuery">
+       
+      select count(*) from 
+           (
+          select * from ( 
+						  select d.* ,concat_ws ('', userid, username) as t from 
+							  (
+								select c.*, u.username as username  from reorder c  LEFT JOIN user u on c.userid = u.userid 
+					          ) d  
+					     )f     
+				where  
+				factory_id = #{factoryId,jdbcType=VARCHAR}  and f.reOrder_state != 3 
+				and  
+				EXISTS(select permission from back_user where backuserId = #{salesId,jdbcType=VARCHAR} and permission=1)		
+			<if test="userName !=null and userName !='' ">
+				and t like '%${userName}%'
+			</if>
+			<if test="beginDate !=null and beginDate != '' ">
+				and Date(create_time) &gt;= Date(#{beginDate,jdbcType=TIMESTAMP})
+			</if>
+			<if test="endDate !=null and beginDate != '' ">
+				and Date(create_time) &lt;= Date(#{endDate,jdbcType=TIMESTAMP})
+			</if>
+			
+        ) cd			
+    </select>
+	
+	<!-- 根据reOrderId查询新图纸信息 -->
+	<select id="queryById" resultMap="ReOrderResultMap" parameterType="int">
+	   select 
+	   <include refid="ReOrderColumnList" /> 
+	   from reorder 
+	   where id = #{id,jdbcType=INTEGER}
+	</select>
+	
+	<update id="updateById" parameterType="com.cbt.entity.ReOrder">
+	    update reorder 
+		<set> 
+	    <if test="followUp != null">
+			follow_up = #{followUp,jdbcType=VARCHAR},
+		</if>
+	    <if test="reOrderState != null">
+			reOrder_state = #{reOrderState,jdbcType=INTEGER},
+		</if>
+		 <if test="followTime != null">
+			follow_time = #{followTime,jdbcType=TIMESTAMP},
+		</if>
+		 <if test="followComment != null">
+			follow_comment = #{followComment,jdbcType=VARCHAR},
+		</if>
+		 <if test="historyId != null">
+			history_id = #{historyId,jdbcType=INTEGER},
+		</if>
+	    </set>
+		    where id = #{id,jdbcType=INTEGER}	    
+	</update>
+	
+
+
+</mapper>

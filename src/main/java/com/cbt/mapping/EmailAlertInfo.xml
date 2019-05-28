@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.EmailAlertInfoDao">
+
+	<resultMap id="EmailAlertInfoMap" type="com.cbt.entity.EmailAlertInfo">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="email_type" property="emailType" jdbcType="VARCHAR" />
+		<result column="email_content" property="emailContent" jdbcType="LONGVARCHAR" />
+		<result column="email_title" property="emailTitle" jdbcType="VARCHAR" />
+	</resultMap> 
+
+	<!-- 查询所有币种 -->
+    <select id="queryAll" resultMap="EmailAlertInfoMap">
+          select * from email_alert_info    
+    </select>
+
+        <!-- 根据id查询 -->
+    <select id="queryById" resultMap="EmailAlertInfoMap" parameterType="int">
+          select * from email_alert_info where id = #{id,jdbcType=INTEGER}       
+    </select>
+	
+</mapper>

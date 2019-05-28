@@ -1,0 +1,231 @@
+package com.cbt.controller;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.cbt.entity.EmailAlertInfo;
+import com.cbt.entity.MessageLogTab;
+import com.cbt.entity.User;
+import com.cbt.enums.MessageTypeEnum;
+import com.cbt.service.EmailAlertInfoService;
+import com.cbt.service.MessageLogTabService;
+import com.cbt.service.UserRelationEmailService;
+import com.cbt.service.UserService;
+import com.cbt.util.Base64Encode;
+import com.cbt.util.DateFormat;
+import com.cbt.util.NbMailAddressUtil;
+import com.cbt.util.UtilFuns;
+import com.cbt.util.WebCookie;
+
+@Controller
+@RequestMapping("/port")
+public class SendMailPort {
+
+	public static Logger LOG = Logger.getLogger(SendMailPort.class); 
+	
+	@Resource
+	private EmailAlertInfoService emailAlertInfoService;
+	@Resource
+	private UserService userService;
+    @Resource
+	private MessageLogTabService messageLogTabService;
+    @Resource
+    private UserRelationEmailService userRelationEmailService;
+	
+	private static final int DELIVERY_DATE_ALERT= 1;
+	private static final int PO_ALERT= 2;
+	private static final int QC_ALERT= 3;
+	private static final int SHIPPING_ALERT= 4;
+	private static final int WEEKNESS_REPORT_ALERT= 5;
+	private static final int INVOICE_ALERT= 6;
+	
+	
+	public static final String domain = NbMailAddressUtil.getDomainName();
+	/**
+	 * 发送客户邮件
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping("/sendMailByMessageType.do")
+	public JsonResult<String> sendMailByMessageType(HttpServletRequest request, HttpServletResponse response) {
+		
+//		String loginEmail = "";
+		String salesId = "";
+		String customerId = "";
+		String result1 = "";
+		Integer emailTypeId = null;
+		String emailContent = "";
+		String emailTitle = "";
+		try {
+//			loginEmail = request.getParameter("loginEmail");
+//			if(loginEmail == null || "".equals(loginEmail)){
+//				throw new RuntimeException("邮箱不能为空");
+//			}
+			
+			customerId = request.getParameter("customerId");
+			if(customerId == null || "".equals(customerId)){
+				throw new RuntimeException("客户id不能为空");
+			}
+               
+			salesId = WebCookie.getUserId(request);		
+			String orderId = request.getParameter("orderId");
+            if(request.getParameter("emailTypeId") == null || "".equals(request.getParameter("emailTypeId"))){
+            	throw new RuntimeException("未获取到消息提醒类型");
+            }
+			String domain = NbMailAddressUtil.getDomainName();
+         	emailTypeId = Integer.parseInt(request.getParameter("emailTypeId"));
+         	EmailAlertInfo emailAlertInfo = emailAlertInfoService.queryById(emailTypeId);
+         	emailContent = emailAlertInfo.getEmailContent();
+         	emailTitle = emailAlertInfo.getEmailTitle();
+		   
+         	if(emailTypeId == PO_ALERT){
+         		emailContent = emailContent.replaceAll("<a>(.*?)</a>","<a href="+domain+"/crm/queryAllClientOrder.do?userId="+customerId+">"+domain+"/crm/queryAllClientOrder.do?userId="+customerId+"</a>");
+         	}else if(emailTypeId == DELIVERY_DATE_ALERT){
+         		emailContent = emailContent.replaceAll("<a>(.*?)</a>","<a href="+domain+"/crm/queryAllClientOrder.do?userId="+customerId+">"+domain+"/crm/queryAllClientOrder.do?userId="+customerId+"</a>");
+         	}else if(emailTypeId == QC_ALERT){
+			    emailContent = emailContent.replaceAll("<a>(.*?)</a>","<a href="+domain+"/crm/queryAllClientOrder.do?userId="+customerId+">"+domain+"/crm/queryAllClientOrder.do?userId="+customerId+"</a>");
+		    }else if(emailTypeId == SHIPPING_ALERT){
+			    emailContent = emailContent.replaceAll("<a>(.*?)</a>","<a href="+domain+"/crm/queryAllClientOrder.do?userId="+customerId+">"+domain+"/crm/queryAllClientOrder.do?userId="+customerId+"</a>");
+		    }else if(emailTypeId == WEEKNESS_REPORT_ALERT){
+			    emailContent = emailContent.replaceAll("<a>(.*?)</a>","<a href="+domain+"/crm/queryOrderDetails.do?orderId="+orderId+">"+domain+"/crm/queryOrderDetails.do?orderId="+orderId+"</a>");
+		    }else if(emailTypeId == INVOICE_ALERT){
+			    emailContent = emailContent.replaceAll("<a>(.*?)</a>","<a href="+domain+"/crm/queryInvoiceByOrderId.do?orderId="+orderId+">"+domain+"/crm/queryInvoiceByOrderId.do?orderId="+orderId+"</a>");
+		    }
+         	
+         	
+         	emailContent = URLEncoder.encode(emailContent, "utf-8");
+		   //===========================//调用接口				
+			String sendEmailAddress = NbMailAddressUtil.getSendMailPathSave();
+//			String email = URLEncoder.encode(loginEmail, "UTF-8");
+			PrintWriter out = null;
+			 
+			  BufferedReader in = null;
+			  
+			  try {
+			  				  
+			      URL realUrl = new URL(sendEmailAddress);
+			      // 打开和URL之间的连接
+			      URLConnection conn = realUrl.openConnection();
+			      // 设置通用的请求属性
+			     // conn.setRequestProperty("accept", "*/*");
+			   conn.setRequestProperty("connection", "Keep-Alive");
+			      conn.setRequestProperty("user-agent",
+			              "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+			      // 发送POST请求必须设置如下两行
+			      conn.setDoOutput(true);
+			      conn.setDoInput(true);
+			      // 获取URLConnection对象对应的输出流
+			      out = new PrintWriter(conn.getOutputStream());
+			      
+  
+//			      String content="We are about to send you a sample or product batch.Please enter the system <span dir='ltr'><a href='"+domain+"' target='_blank'>here</a></span> ";
+			      // 发送请求参数emaillAddress, sm,map,path
+			      out.print("&erpid="+customerId+"&saleId="+salesId+"&title="+emailTitle+"&content="+emailContent);
+			      // flush输出流的缓冲
+			      out.flush();
+			      // 定义BufferedReader输入流来读取URL的响应
+			      in = new BufferedReader(
+			              new InputStreamReader(conn.getInputStream()));
+			      String line;
+			      while ((line = in.readLine()) != null) {
+			          result1 += line;
+			      }
+			      result1 = new String(result1.getBytes("gbk"),"utf-8");
+                  
+				  return new JsonResult<String>(0,result1);
+			  } catch (Exception e) {
+				  LOG.error(e.getMessage());
+				 e.printStackTrace();
+				 return new JsonResult<String>(1,"发送失败");
+			  }
+		} catch (Exception e) {		
+			LOG.error("======SendMailPort sendMailByMessageType======="+e.getMessage());
+			e.printStackTrace();
+			return new JsonResult<String>(1,"发送失败");
+		}
+
+    }
+	
+	
+	
+	/**
+	 * 发送客户邮件
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/sendMail.do")
+	public String sendMail(HttpServletRequest request, HttpServletResponse response) {
+		
+		try {		
+			String userid = request.getParameter("userid");
+			if(userid == null || "".equals(userid)){
+				throw new RuntimeException("客户id不能为空");
+			}
+			User user = userService.queryByUserId(userid);
+			String pwd = "";
+			if(!(user == null || "".equals(user))){
+				pwd = UtilFuns.randToString(8);
+				user.setPwd(pwd);
+				userService.updateCustomer(user);
+			    String content=
+			    				  "Dear Sir/Madam,<br>"+
+			    				  "We are currently using a CRM system to manage orders. You will be able to get weekly updates, QC reports and shipping documents from there.<br>"+
+                                  "<br>"+
+			    				  "Please click on link below to login:<br>"+
+			    		  "<a href='"+domain+"'>'"+domain+"'</a><br><br>"+
+			    		  "Best regards<br>"+
+			    		  "China Synergy Group";
+			    content = URLEncoder.encode(content, "utf-8");
+			    pwd = Base64Encode.getBase64(pwd);		
+			    
+			    
+			    
+			      //邀请登录log(未进行未发出邮件判断)
+			      MessageLogTab messageLogTab = new MessageLogTab();
+				  messageLogTab.setSaleName(WebCookie.getUserName(request));
+				  messageLogTab.setUserid(userid);
+                  messageLogTab.setMessageType(MessageTypeEnum.INVITATION_LOG.getCode());
+				  messageLogTab.setCreateTime(DateFormat.format());
+				  messageLogTabService.insertSelective(messageLogTab);
+			    
+			    
+			   return "redirect:http://112.64.174.34:43887/NBEmail/helpServlet?action=inviteLogin&className=ExternalInterfaceServlet&&eid="+userid+"&&content="+content+"&&pwd="+pwd; 
+//			   return "redirect:http://192.168.1.62:8080/NBEmail/helpServlet?action=inviteLogin&className=ExternalInterfaceServlet&&eid="+userid+"&&content="+content+"&&pwd="+pwd; 
+			}else{
+				return "";
+			}
+		} catch (Exception e) {		
+			LOG.error("======UserQueryController  sendMail======="+e.getMessage());
+			e.printStackTrace();
+			return "";
+		}
+  
+	}
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+}

@@ -1,0 +1,183 @@
+package com.cbt.service.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.cbt.dao.CrmClientidDao;
+import com.cbt.dao.FactoryUserRelationDao;
+import com.cbt.dao.ShippingInfoDao;
+import com.cbt.dao.UserDao;
+import com.cbt.dao.UserFactoryRelationDao;
+import com.cbt.dao.UserRelationEmailDao;
+import com.cbt.entity.CrmClientid;
+import com.cbt.entity.User;
+import com.cbt.entity.UserRelationEmail;
+import com.cbt.service.UserService;
+@Service
+
+public class UserServiceImpl implements UserService {
+   
+	@Resource
+	private UserDao userDao;
+	@Resource
+	private CrmClientidDao crmClientidDao;
+	@Resource
+	private UserFactoryRelationDao userFactoryRelationDao;
+	@Resource
+	private FactoryUserRelationDao factoryUserRelationDao;
+	@Resource
+	private ShippingInfoDao shippingInfoDao;
+	@Resource
+	private UserRelationEmailDao userRelationEmailDao;
+	
+	@Transactional
+	@Override
+	public void insertUser(List<Object> list) {
+		userDao.insertUser(list);
+      
+	}
+	
+	
+	@Override
+	public Map<Object,Object> queryByUser(String userid)throws Exception{
+		
+		Map<Object,Object> map = new HashMap<Object,Object>();
+		User user = userDao.queryByUserId(userid);
+		List<CrmClientid> crmClientids = crmClientidDao.queryByUserid(userid);
+		map.put("user", user);
+		map.put("crmClientids", crmClientids);
+		
+		return map;
+	}
+
+
+	@Override
+	public List<User> queryUserList(String info,Integer start,Integer pageSize,String salesId,String factoryId) {
+		return userDao.queryUserList(info,start,pageSize,salesId,factoryId);
+	}
+
+
+	@Override
+	public Integer queryUserTotal(String info,String salesId,String factoryId) {
+		return userDao.queryUserTotal(info,salesId,factoryId);
+	}
+	@Override
+	public List<User> queryUserListAdmin(String info,Integer start,Integer pageSize,String salesId,String factoryId) {
+		return userDao.queryUserListAdmin(info,start,pageSize,salesId,factoryId);
+	}
+	
+	
+	@Override
+	public Integer queryUserTotalAdmin(String info,String salesId,String factoryId) {
+		return userDao.queryUserTotalAdmin(info,salesId,factoryId);
+	}
+
+
+	@Override
+	public User queryById(Integer id) {
+		return userDao.queryById(id);
+	}
+
+
+	@Override
+	public User queryByLoginMail(String loginEmail) {
+		
+		return userDao.queryByLoginMail(loginEmail);
+	}
+
+	@Transactional
+	@Override
+	public void updateCustomer(User user) {
+		UserRelationEmail userRelationEmail = userRelationEmailDao.queryUseridByEmail(user.getLoginEmail());
+		if(userRelationEmail == null){
+			UserRelationEmail relationEmail = new UserRelationEmail();
+			relationEmail.setEmail(user.getLoginEmail());
+			relationEmail.setPwd(user.getPwd());
+			relationEmail.setUserid(user.getUserid());
+			relationEmail.setUsername(user.getUserName());
+			userRelationEmailDao.insert(relationEmail);
+		}else{
+			userRelationEmail.setEmail(user.getLoginEmail());
+			userRelationEmail.setPwd(user.getPwd());
+			userRelationEmail.setUsername(user.getUserName());
+			userRelationEmail.setUserid(user.getUserid());
+			userRelationEmailDao.update(userRelationEmail);
+		}
+		userDao.updateCustomer(user);
+
+	}
+
+	@Transactional
+	@Override
+	public void insertUserByAdmin(User user) {
+		userDao.insertUserByAdmin(user);
+		
+	}
+
+
+	@Override
+	public User queryByUserId(String userid) {
+		return userDao.queryByUserId(userid);
+	}
+
+
+	@Override
+	public List<User> queryUserBySalesId(String salesId, String factoryId) {
+		return userDao.queryUserBySalesId(salesId, factoryId);
+	}
+
+
+	@Override
+	public List<User> queryUserBySalesIdAdmin(String salesId, String factoryId) {
+		return userDao.queryUserBySalesIdAdmin(salesId, factoryId);
+	}
+
+
+	@Transactional
+	@Override
+	public void insertUser(List<Object> list, List<Object> list1,List<Object> list2,List<Object> list4,List<Object> relationEmails)throws Exception{
+		if(list != null && list.size() != 0){
+			userDao.insertUser(list);	
+		}
+		if(list1 != null && list1.size() != 0){
+			userFactoryRelationDao.insertBatch(list1);	
+		}
+		if(list2 != null && list2.size() != 0){
+			factoryUserRelationDao.insertBatch(list2);	
+		}
+		if(list4 != null && list4.size() != 0){
+		    shippingInfoDao.insertShippingInfo(list4);
+		}
+		if(relationEmails != null && relationEmails.size() !=0){
+			userRelationEmailDao.insertUserRelationEmail(relationEmails);
+		}
+	}
+
+
+	@Override
+	public List<User> queryUserByOrderUpdate() {
+		return userDao.queryUserByOrderUpdate();
+	}
+
+
+	@Override
+	public List<User> queryUserByInvitation() {
+		return userDao.queryUserByInvitation();
+	}
+
+
+	@Override
+	public List<User> queryUserByLogin() {
+		return userDao.queryUserByLogin();
+	}
+	
+	
+	
+
+}

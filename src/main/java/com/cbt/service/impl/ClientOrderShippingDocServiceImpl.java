@@ -1,0 +1,65 @@
+package com.cbt.service.impl;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.transaction.Transactional;
+
+import org.springframework.stereotype.Service;
+
+import com.cbt.dao.ClientOrderShippingDocDao;
+import com.cbt.entity.ClientOrderShippingDoc;
+import com.cbt.service.ClientOrderShippingDocService;
+import com.cbt.util.OperationFileUtil;
+
+
+@Service
+public class ClientOrderShippingDocServiceImpl implements ClientOrderShippingDocService {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	@Resource
+	private ClientOrderShippingDocDao clientOrderShippingDocDao;
+	
+	@Override
+	public List<ClientOrderShippingDoc> queryByClientOrderId(String orderId) {
+		return clientOrderShippingDocDao.queryByClientOrderId(orderId);
+	}
+
+	@Override
+	public void insertBatch(List<ClientOrderShippingDoc> list) {
+		clientOrderShippingDocDao.insertBatch(list);
+
+	}
+
+	@Transactional
+	@Override
+	public void deleteById(Integer id) {
+		clientOrderShippingDocDao.deleteById(id);
+	}
+
+	@Override
+	public ClientOrderShippingDoc queryById(Integer id) {
+		return clientOrderShippingDocDao.queryById(id);
+	}
+
+	@Override
+	public void updateShippingDoc(ClientOrderShippingDoc clientOrderShippingDoc) {
+		clientOrderShippingDocDao.updateShippingDoc(clientOrderShippingDoc);
+		
+	}
+
+	@Override
+	public void insert(ClientOrderShippingDoc clientOrderShippingDoc) {
+		clientOrderShippingDocDao.insert(clientOrderShippingDoc);
+		
+	}
+
+	@Override
+	public int queryBySailDateAndOrderId(String sailDate, String orderId) {
+		return clientOrderShippingDocDao.queryBySailDateAndOrderId(sailDate, orderId);
+	}
+
+}

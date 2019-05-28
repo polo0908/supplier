@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.PaymentPlanDao">
+
+	<resultMap id="PaymentPlanResultMap" type="com.cbt.entity.PaymentPlan">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="order_id" property="orderId" jdbcType="VARCHAR" />
+		<result column="invoice_id" property="invoiceId" jdbcType="VARCHAR" />
+		<result column="payment_bank" property="paymentBank" jdbcType="INTEGER" />
+		<result column="payment_time" property="paymentTime" jdbcType="DATE" />
+		<result column="amount" property="amount" jdbcType="DOUBLE" />
+		<result column="amount_actual" property="amountActual" jdbcType="DOUBLE" />
+		<result column="predict_payment_time" property="predictPaymentTime" jdbcType="DATE" />
+		<result column="erp_invoice_id" property="erpInvoiceId" jdbcType="INTEGER" />
+	</resultMap> 
+
+	<sql id="PaymentPlanColumnList">
+		id, order_id, invoice_id,payment_bank, payment_time, amount, amount_actual,
+		predict_payment_time,erp_invoice_id
+	</sql>
+	
+     <!-- 单条插入PaymentPlan数据 -->
+	<insert id="insertPaymentPlan" parameterType="com.cbt.entity.PaymentPlan">
+	    insert into payment_plan 
+		    (
+		    invoice_id,order_id,
+			payment_bank, payment_time, amount,amount_actual,
+			predict_payment_time,erp_invoice_id
+            )
+	    values	    
+	      (          
+		    #{invoiceId,jdbcType=VARCHAR}, 
+		    #{orderId,jdbcType=VARCHAR},	  
+		    #{paymentBank,jdbcType=VARCHAR},
+		    #{paymentTime,jdbcType=DATE},
+		    #{amount,jdbcType=DOUBLE},
+		    #{amountActual,jdbcType=DOUBLE},
+		    #{predictPaymentTime,jdbcType=DATE},
+		    #{erpInvoiceId,jdbcType=INTEGER}
+	      )
+
+	</insert>
+    
+    <!-- 批量插入数据 -->
+	<insert id="insertPaymentPlans" parameterType="java.util.List">
+	    insert into payment_plan 
+		    (
+		    order_id, invoice_id,payment_bank, payment_time, amount,amount_actual,predict_payment_time
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.orderId},#{item.invoiceId},#{item.paymentBank},#{item.paymentTime},
+		    #{item.amount},#{item.amountActual}, #{item.predictPaymentTime}
+	      )
+	    </foreach>
+	  </insert>
+
+	 <!-- 更新payment数据 -->
+    <update id="updatePaymentPlan" parameterType="com.cbt.entity.PaymentPlan">
+	    update payment_plan 
+		<set> 
+	    <if test="orderId != null">
+			order_id = #{orderId,jdbcType=VARCHAR},
+		</if>
+	    <if test="invoiceId != null">
+			invoice_id = #{invoiceId,jdbcType=VARCHAR},
+		</if>
+	    <if test="paymentBank != null">
+			payment_bank = #{paymentBank,jdbcType=INTEGER},
+		</if>
+	    <if test="paymentTime != null">
+			payment_time = #{paymentTime,jdbcType=DATE},
+		</if>
+	    <if test="amount != null">
+			amount = #{amount,jdbcType=DOUBLE},
+		</if>
+	    <if test="amountActual != null">
+			amount_actual = #{amountActual,jdbcType=DOUBLE},
+		</if>
+	    <if test="predictPaymentTime != null">
+			predict_payment_time = #{predictPaymentTime,jdbcType=DATE},
+		</if>
+       </set>
+        where id = #{id,jdbcType=INTEGER}	 
+    </update>  
+	  
+	<!-- 根据发票编号查询付款计划 -->
+	<select id="queryPaymentPlan" parameterType="string" resultMap="PaymentPlanResultMap">
+	    select 
+	    <include refid="PaymentPlanColumnList"/>
+	    from payment_plan  
+	    where invoice_id = #{invoiceId,jdbcType=VARCHAR}
+	
+	</select>
+	<!-- 根据发票编号查询付款计划 -->
+	<select id="queryByErpInvoiceId" parameterType="int" resultMap="PaymentPlanResultMap">
+	    select 
+	    <include refid="PaymentPlanColumnList"/>
+	    from payment_plan  
+	    where erp_invoice_id = #{erpInvoiceId,jdbcType=INTEGER}
+	
+	</select>
+	
+	<!-- 查询 第一次付款日期-->
+	<select id="selectFirstPayment" parameterType="string" resultType="string">
+	 select payment_time  
+	 from payment_plan 
+	 where order_id = #{orderId,jdbcType=VARCHAR}  ORDER BY payment_time LIMIT 0,1	
+	</select>
+	
+	
+	<!-- 查询付款计划最晚时间 -->
+	<select id="queryLastPaymentTime" parameterType="string" resultType="string">
+	    select 
+	    max(payment_time)  
+	    from payment_plan  
+	    where invoice_id = #{invoiceId,jdbcType=VARCHAR} 
+	
+	</select>
+    
+	<delete id="deleteByInvoiceId" parameterType="string">
+	    delete from payment_plan 	    
+	    where invoice_id = #{invoiceId,jdbcType=VARCHAR} 
+	</delete>
+</mapper>

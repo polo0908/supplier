@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.QuotationDao">
+	<resultMap type="com.cbt.entity.QuotationBean" id="quotationResultMap">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="userId" column="userid" jdbcType="VARCHAR"/>
+		<result property="factoryId" column="factory_id" jdbcType="VARCHAR"/>
+		<result property="quotationId" column="quotation_id" jdbcType="VARCHAR"/>
+		<result property="projectId" column="project_id" jdbcType="VARCHAR"/>
+		<result property="quotationSubject" column="quotation_subject" jdbcType="VARCHAR"/>
+		<result property="customerName" column="customer_name" jdbcType="VARCHAR"/>
+		<result property="currency" column="currency" jdbcType="VARCHAR"/>
+		<result property="incoTerm" column="inco_term" jdbcType="VARCHAR"/>
+		<result property="quotationDate" column="quotation_date" jdbcType="DATE"/>
+		<result property="quotationValidity" column="quotation_validity" jdbcType="INTEGER"/>
+		<result property="quoter" column="quoter" jdbcType="VARCHAR"/>
+		<result property="quoterEmail" column="quoter_email" jdbcType="VARCHAR"/>
+		<result property="quoterTel" column="quoter_tel" jdbcType="VARCHAR"/>
+		<result property="remark" column="remark" jdbcType="LONGVARCHAR"/>
+		<result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+		<result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+		<result property="remarkImg" column="remark_img" jdbcType="LONGVARCHAR"/>
+		<result property="quotationPath" column="quotation_path" jdbcType="VARCHAR"/>
+		<result property="imgNames" column="img_names" jdbcType="LONGVARCHAR"/>
+		<result property="readStatus" column="read_status" jdbcType="INTEGER"/>		
+		<result property="rfqId" column="rfq_id" jdbcType="INTEGER"/>
+		<result property="saleName" column="sale_name" jdbcType="VARCHAR"/>
+		<result property="quotationStatus" column="quotation_status" jdbcType="INTEGER"/>
+		<result property="exchangeRateCNY" column="exchange_rate_CNY" jdbcType="DOUBLE"/>
+		<result property="exchangeRateEUR" column="exchange_rate_EUR" jdbcType="DOUBLE"/>
+		<result property="exchangeRateGBP" column="exchange_rate_GBP" jdbcType="DOUBLE"/>
+		<result property="quotationPriceRange" column="quotation_price_range" jdbcType="VARCHAR"/>
+		<result property="weightStatus" column="weight_status" jdbcType="INTEGER"/>
+		<result property="processStatus" column="process_status" jdbcType="INTEGER"/>
+		<result property="pdfType" column="pdf_type" jdbcType="INTEGER"/>		
+		<result property="exchangeUpdateDate" column="exchange_update_date" jdbcType="DATE"/>
+		
+		
+<!-- 		<association property="rfqInfo" javaType="com.cbt.entity.RfqInfo"> -->
+<!-- 		<id column="id" property="id" jdbcType="INTEGER" /> -->
+<!-- 		<result column="userid" property="userid" jdbcType="VARCHAR" /> -->
+<!-- 		<result column="product_name" property="productName" jdbcType="VARCHAR" /> -->
+<!-- 		<result column="drawing_path" property="drawingPath" jdbcType="VARCHAR" /> -->
+<!--         <result column="create_time" property="createTime" jdbcType="TIMESTAMP" /> -->
+<!--         <result column="drawing_name" property="drawingName" jdbcType="VARCHAR" /> -->
+<!--         <result column="comment" property="comment" jdbcType="VARCHAR" /> -->
+<!--       	<result column="factory_id" property="factoryId" jdbcType="VARCHAR" /> -->
+<!-- 		</association> -->
+	</resultMap>
+	
+	
+	<resultMap type="com.cbt.entity.AmountUnit" id="currencyListResultMap">
+		<id property="id" column="id"/>
+		<result property="currency" column="currency"/>
+		<result property="currencyShorthand" column="currency_shorthand"/>
+	</resultMap>
+	
+	<resultMap type="com.cbt.entity.QuotationRemarkTemplate" id="quotationRemarkTemplateResultMap">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="factoryId" column="factory_id" jdbcType="VARCHAR"/>
+		<result property="remark" column="remark" jdbcType="LONGVARCHAR"/>
+		<result property="textOrPicture" column="text_or_picture" jdbcType="INTEGER"/>
+		<result property="picturePath1" column="picture_path1" jdbcType="VARCHAR"/>
+		<result property="picturePath2" column="picture_path2" jdbcType="VARCHAR"/>
+		<result property="picturePath3" column="picture_path3" jdbcType="VARCHAR"/>
+		<result property="picturePath4" column="picture_path4" jdbcType="VARCHAR"/>
+		<result property="picturePath1Compress" column="picture_path1_compress" jdbcType="VARCHAR"/>
+		<result property="picturePath2Compress" column="picture_path2_compress" jdbcType="VARCHAR"/>
+		<result property="picturePath3Compress" column="picture_path3_compress" jdbcType="VARCHAR"/>
+		<result property="picturePath4Compress" column="picture_path4_compress" jdbcType="VARCHAR"/>
+		<result property="remarkIndex" column="remark_index" jdbcType="INTEGER"/>
+	</resultMap>
+
+	<sql id="list">
+	id,userid,factory_id,quotation_id,project_id,quotation_subject,customer_name,currency,inco_term,
+	quoter,quotation_date,quotation_validity,quoter_email,quoter_tel,remark,create_time,
+	update_time,remark_img,quotation_path,img_names,read_status,rfq_id,sale_name,quotation_status,
+	exchange_rate_CNY,exchange_rate_EUR,exchange_rate_GBP,quotation_price_range,weight_status, process_status,
+	pdf_type,exchange_update_date
+	</sql>
+
+
+	<select id="queryForListAdmin" resultMap="quotationResultMap">
+		select <include refid="list"/> from quotation_info
+		where factory_id = #{factoryId,jdbcType=VARCHAR}
+			<if test="user!=null and user!=''">
+				and customer_name like CONCAT('%',#{user},'%')
+				 or userid like CONCAT('%',#{user},'%')   
+				 or project_id like CONCAT('%',#{user},'%')  
+			</if>
+			<if test="begin != null and begin !=''">
+				and date(quotation_date) &gt;= date(#{begin})
+			</if>
+			<if test="end != null and end !=''">
+				and date(quotation_date) &lt;= date(#{end})
+			</if>
+		order by quotation_date desc	
+		limit #{page},10
+	</select>
+	
+	<select id="queryCountForPageAdmin" resultType="int">
+		select count(id) from quotation_info
+		where factory_id = #{factoryId,jdbcType=VARCHAR}
+			<if test="user!=null and user!=''">
+				and customer_name like CONCAT('%',#{user},'%')
+				 or userid like CONCAT('%',#{user},'%')
+				 or project_id like CONCAT('%',#{user},'%')  
+			</if>
+			<if test="begin != null and begin !=''">
+				and date(quotation_date) &gt;= date(#{begin})
+			</if>
+			<if test="end != null and end !=''">
+				and date(quotation_date) &lt;= date(#{end})
+			</if>
+	</select>
+	
+	<select id="queryForList" resultMap="quotationResultMap">
+		select <include refid="list"/> from quotation_info
+		<where>
+			<if test="user!=null and user!=''">
+				and customer_name like CONCAT('%',#{user},'%')
+				 or userid like CONCAT('%',#{user},'%')
+				  or project_id like CONCAT('%',#{user},'%') 
+			</if>
+			<if test="begin != null and begin !=''">
+				and date(quotation_date) &gt; date(#{begin})
+			</if>
+			<if test="end != null and end !=''">
+				and date(quotation_date) &lt; date(#{end})
+			</if>
+			and 
+			(
+			quoter = #{username,jdbcType=VARCHAR} or sale_name = #{username,jdbcType=VARCHAR} 		
+			)	
+			and factory_id = #{factoryId,jdbcType=VARCHAR}  
+			order by quotation_date desc	
+		</where>
+		limit #{page},10
+	</select>
+	
+	<select id="queryCountForPage" resultType="int">
+		select count(id) from quotation_info
+		<where>
+			<if test="user!=null and user!=''">
+				and customer_name like CONCAT('%',#{user},'%')
+				 or userid like CONCAT('%',#{user},'%')  
+				 or project_id like CONCAT('%',#{user},'%')
+			</if>
+			<if test="begin != null and begin !=''">
+				and date(quotation_date) &gt; date(#{begin})
+			</if>
+			<if test="end != null and end !=''">
+				and date(quotation_date) &lt; date(#{end})
+			</if>
+			and 
+			(
+			quoter = #{username,jdbcType=VARCHAR} or sale_name = #{username,jdbcType=VARCHAR} 		
+			)	
+		     and factory_id = #{factoryId,jdbcType=VARCHAR}
+		</where>
+	</select>
+	
+	<select id="queryCurrencyList" resultMap="currencyListResultMap">
+		select id,currency,currency_shorthand from amount_unit
+	</select>
+	
+	
+	<!-- 查询今天的单数 -->
+	<select id="queryCurrentDateCount" resultType="int">
+		select count(*) from quotation_info where  to_days(create_time) = to_days(now())
+	</select>
+	
+	<select id="queryById" resultMap="quotationResultMap" resultType="int">
+	    select 
+	    <include refid="list"/>
+	    from quotation_info where id = #{id,jdbcType=INTEGER}	
+	</select>
+	
+	
+	<select id="queryByProjectId" resultMap="quotationResultMap" resultType="string">
+	    select 
+	    <include refid="list"/>
+	    from quotation_info where project_id = #{projectId,jdbcType=VARCHAR}	
+	</select>
+	
+	
+	<!-- 查询最大的备注index -->
+	<select id="queryMaxRemarkIndex" resultType="java.lang.Integer">
+	    select max(remark_index+1) from quotation_remark_template	
+	</select>
+	
+	
+	
+	<select id="queryMaxMinPrice" resultType="java.util.HashMap">	
+	   select max(product_price * quantity + mold_price)as maxPrice,min(product_price * quantity + mold_price)as minPrice 
+	         from 
+	               (
+	               select q2.id,q2.quotation_info_id,q2.mold_price from quotation_info q1 
+	                  LEFT JOIN 
+	                 quotation_production_info q2 on q1.id = q2.quotation_info_id
+	               )q3 
+	      LEFT JOIN 
+	      quotation_production_price q4 on q3.id = q4.production_info_id  and q3.mold_price != 0 and q4.product_price !=0
+	      where quotation_info_id = #{quotationInfoId,jdbcType=INTEGER}
+	</select>
+	
+	  <!-- 单条插入quotation数据 -->
+	<insert id="insertQuotation" parameterType="com.cbt.entity.QuotationBean" useGeneratedKeys="true" keyProperty="id">
+	    insert into quotation_info 
+		    (
+		    userid,factory_id,quotation_id,project_id,quotation_subject,
+		    customer_name,currency,inco_term,quoter,
+		    quotation_date,quotation_validity,quoter_email,
+		    quoter_tel,remark,create_time,update_time,remark_img,
+		    img_names,read_status,rfq_id,sale_name,quotation_status,
+		    exchange_rate_CNY,exchange_rate_EUR,exchange_rate_GBP,quotation_price_range,exchange_update_date
+            )
+	    values	    
+	      (  	        
+			#{userId,jdbcType=VARCHAR},
+			#{factoryId,jdbcType=VARCHAR},
+		    #{quotationId,jdbcType=VARCHAR},
+		    #{projectId,jdbcType=VARCHAR},
+            #{quotationSubject,jdbcType=VARCHAR},
+			#{customerName,jdbcType=VARCHAR},
+			#{currency,jdbcType=VARCHAR},
+			#{incoTerm,jdbcType=VARCHAR},
+			#{quoter,jdbcType=VARCHAR},
+			#{quotationDate,jdbcType=DATE},			
+			#{quotationValidity,jdbcType=INTEGER},
+			#{quoterEmail,jdbcType=VARCHAR},
+			#{quoterTel,jdbcType=VARCHAR},
+			#{remark,jdbcType=LONGVARCHAR},
+			#{createTime,jdbcType=TIMESTAMP},
+			#{updateTime,jdbcType=TIMESTAMP},	
+			#{remarkImg,jdbcType=LONGVARCHAR},	
+			#{imgNames,jdbcType=LONGVARCHAR},	
+			#{readStatus,jdbcType=INTEGER},	
+			#{rfqId,jdbcType=INTEGER},	
+			#{saleName,jdbcType=VARCHAR},	
+			#{quotationStatus,jdbcType=INTEGER},	
+			#{exchangeRateCNY,jdbcType=DOUBLE},
+			#{exchangeRateEUR,jdbcType=DOUBLE},	
+			#{exchangeRateGBP,jdbcType=DOUBLE},	
+			#{quotationPriceRange,jdbcType=VARCHAR},
+			#{exchangeUpdateDate,jdbcType=DATE}
+		  )		
+	</insert>
+				
+		
+	   <!-- 更新quotation数据  -->
+    <update id="updateQuotation" parameterType="com.cbt.entity.QuotationBean">
+	    update quotation_info 
+		<set> 
+	    <if test="quotationId != null">
+			quotation_id = #{quotationId,jdbcType=VARCHAR},
+		</if>
+	    <if test="quotationSubject != null">
+			quotation_subject = #{quotationSubject,jdbcType=VARCHAR},
+		</if>
+	    <if test="customerName != null">
+			customer_name = #{customerName,jdbcType=VARCHAR},
+		</if>
+	    <if test="userId != null">
+			userid = #{userId,jdbcType=VARCHAR},
+		</if>
+	    <if test="currency != null">
+			currency = #{currency,jdbcType=VARCHAR},
+		</if>
+	    <if test="incoTerm != null">
+			inco_term = #{incoTerm,jdbcType=VARCHAR},
+		</if>
+	    <if test="quoter != null">
+			quoter = #{quoter,jdbcType=VARCHAR},
+		</if>
+	    <if test="createTime != null">
+			create_time = #{createTime,jdbcType=TIMESTAMP},
+		</if>
+	    <if test="quotationDate != null">
+			quotation_date = #{quotationDate,jdbcType=DATE},
+		</if>
+	    <if test="quotationValidity != null">
+			quotation_validity = #{quotationValidity,jdbcType=INTEGER},
+		</if>
+	    <if test="quoterEmail != null">
+			quoter_email = #{quoterEmail,jdbcType=VARCHAR},
+		</if>
+	    <if test="quoterTel != null">
+			quoter_tel = #{quoterTel,jdbcType=VARCHAR},
+		</if>
+	    <if test="remark != null">
+			remark = #{remark,jdbcType=LONGVARCHAR},
+		</if>
+	    <if test="updateTime != null">
+			update_time = #{updateTime,jdbcType=TIMESTAMP},
+		</if>	
+	    <if test="remarkImg != null">
+			remark_img = #{remarkImg,jdbcType=LONGVARCHAR},
+		</if>	
+	    <if test="quotationPath != null">
+			quotation_path = #{quotationPath,jdbcType=VARCHAR},
+		</if>	
+	    <if test="imgNames != null">
+			img_names = #{imgNames,jdbcType=LONGVARCHAR},
+		</if>	
+	    <if test="quotationStatus != null">
+			quotation_status = #{quotationStatus,jdbcType=INTEGER},
+		</if>	
+	    <if test="exchangeRateCNY != null">
+			exchange_rate_CNY = #{exchangeRateCNY,jdbcType=DOUBLE},
+		</if>	
+	    <if test="exchangeRateEUR != null">
+			exchange_rate_EUR = #{exchangeRateEUR,jdbcType=DOUBLE},
+		</if>	
+	    <if test="exchangeRateGBP != null">
+			exchange_rate_GBP = #{exchangeRateGBP,jdbcType=DOUBLE},
+		</if>	
+	    <if test="quotationPriceRange != null">
+			quotation_price_range = #{quotationPriceRange,jdbcType=VARCHAR},
+		</if>	
+	    <if test="weightStatus != null">
+			weight_status = #{weightStatus,jdbcType=INTEGER},
+		</if>	
+	    <if test="processStatus != null">
+			process_status = #{processStatus,jdbcType=INTEGER},
+		</if>	
+	    <if test="pdfType != null">
+			pdf_type = #{pdfType,jdbcType=INTEGER},
+		</if>	
+	    <if test="exchangeUpdateDate != null">
+			exchange_update_date = #{exchangeUpdateDate,jdbcType=DATE},
+		</if>	
+	    </set>
+	     where id = #{id,jdbcType=INTEGER}	
+	</update> 
+	
+	<!-- 删除报价单 -->
+	<delete id="deleteQuotation" parameterType="int">
+	   delete from quotation_info
+	   where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	   
+	
+	<!-- 单条插入备注模板数据 -->
+	<insert id="insertTempRemark" parameterType="com.cbt.entity.QuotationRemarkTemplate" useGeneratedKeys="true" keyProperty="id">
+	    insert into quotation_remark_template 
+		    (
+		    factory_id,remark,text_or_picture,picture_path1,picture_path2,picture_path3,picture_path4,
+		    picture_path1_compress,picture_path2_compress,picture_path3_compress,picture_path4_compress,remark_index
+            )
+	    values	    
+	      (  	        
+			#{factoryId,jdbcType=VARCHAR},
+			#{remark,jdbcType=LONGVARCHAR},
+			#{textOrPicture,jdbcType=INTEGER},
+			#{picturePath1,jdbcType=VARCHAR},
+			#{picturePath2,jdbcType=VARCHAR},
+			#{picturePath3,jdbcType=VARCHAR},
+			#{picturePath4,jdbcType=VARCHAR},
+			#{picturePath1Compress,jdbcType=VARCHAR},
+			#{picturePath2Compress,jdbcType=VARCHAR},
+			#{picturePath3Compress,jdbcType=VARCHAR},
+			#{picturePath4Compress,jdbcType=VARCHAR},
+			#{remarkIndex,jdbcType=INTEGER}
+		  )	
+    </insert>	
+	
+	
+	<update id="updateTempRemark"  parameterType="com.cbt.entity.QuotationRemarkTemplate">
+	    update quotation_remark_template
+	    <set> 
+	    <if test="remark != null">
+			remark = #{remark,jdbcType=LONGVARCHAR},
+		</if>
+	    <if test="factoryId != null">
+			factory_id = #{factoryId,jdbcType=VARCHAR},
+		</if>
+	    <if test="picturePath1 != null">
+			picture_path1 = #{picturePath1,jdbcType=VARCHAR},
+		</if>
+	    <if test="picturePath2 != null">
+			picture_path2 = #{picturePath2,jdbcType=VARCHAR},
+		</if>
+	    <if test="picturePath3 != null">
+			picture_path3 = #{picturePath3,jdbcType=VARCHAR},
+		</if>
+	    <if test="picturePath4 != null">
+			picture_path4 = #{picturePath4,jdbcType=VARCHAR},
+		</if>
+	    <if test="picturePath1Compress != null">
+			picture_path1_compress = #{picturePath1Compress,jdbcType=VARCHAR},
+		</if>
+	    <if test="picturePath2Compress != null">
+			picture_path2_compress = #{picturePath2Compress,jdbcType=VARCHAR},
+		</if>
+	    <if test="picturePath3Compress != null">
+			picture_path3_compress = #{picturePath3Compress,jdbcType=VARCHAR},
+		</if>
+	    <if test="picturePath4Compress != null">
+			picture_path4_compress = #{picturePath4Compress,jdbcType=VARCHAR},
+		</if>
+	    <if test="remarkIndex != null">
+			remark_index = #{remarkIndex,jdbcType=INTEGER},
+		</if>
+		</set>
+	     where id = #{id,jdbcType=INTEGER}	
+	</update>
+	
+	<!-- 根据remark表id查询 -->
+	<select id="queryByRemarkId" resultMap="quotationRemarkTemplateResultMap" parameterType="java.lang.Integer">
+	   select id,factory_id,remark,text_or_picture,picture_path1,picture_path2,picture_path3,picture_path4,
+	   picture_path1_compress,picture_path2_compress,picture_path3_compress,picture_path4_compress,remark_index    
+	   from quotation_remark_template where id = #{id,jdbcType=INTEGER}	
+	</select>
+	
+	<!-- 根据工厂ID查询 -->
+	<select id="queryTempRemarkByFactoryId" resultMap="quotationRemarkTemplateResultMap" parameterType="string">
+	   select id,factory_id,remark,text_or_picture,picture_path1,picture_path2,picture_path3,picture_path4,
+	   picture_path1_compress,picture_path2_compress,picture_path3_compress,picture_path4_compress,remark_index     
+	   from quotation_remark_template where factory_id = #{factoryId,jdbcType=VARCHAR}	order by remark_index,id desc
+	</select>
+	
+	<!-- 删除未保存的图片模板 -->
+	<delete id="deleteTempRemarkById" parameterType="int">
+	   delete from quotation_remark_template	
+	   where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+
+</mapper>

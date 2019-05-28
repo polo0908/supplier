@@ -1,0 +1,167 @@
+package com.cbt.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.cbt.entity.AmountUnit;
+import com.cbt.entity.QuotationBean;
+import com.cbt.entity.QuotationRemarkTemplate;
+
+public interface QuotationDao {
+
+	/**
+	 * 根据工厂Id查询报价单（管理员查询）
+	 * @author polo
+	 * 2017年5月22日
+	 *
+	 */
+	public List<QuotationBean> queryForListAdmin(@Param("user")String user, @Param("begin")String beginDate,@Param("end")String endDate,@Param("page")Integer page,@Param("factoryId")String factoryId);
+	/**
+	 * 根据工厂Id查询报价单数量（管理员查询）
+	 * @author polo
+	 * 2017年5月22日
+	 *
+	 */
+	public int queryCountForPageAdmin(@Param("user")String user, @Param("begin")String beginDate,@Param("end") String endDate,@Param("factoryId")String factoryId);
+
+	/**
+	 * 根据工厂Id查询报价单（普通销售查询）
+	 * @author polo
+	 * 2017年5月22日
+	 *
+	 */
+	public List<QuotationBean> queryForList(@Param("user")String user,@Param("begin") String begin,@Param("end")String end,@Param("page") Integer page,@Param("username") String userName,@Param("factoryId")String factoryId);
+
+	/**
+	 * 根据工厂Id查询报价单数量（普通销售查询）
+	 * @author polo
+	 * 2017年5月22日
+	 *
+	 */
+	public int queryCountForPage(@Param("user")String user,@Param("begin") String begin,@Param("end") String end,@Param("username")String userName,@Param("factoryId")String factoryId);
+    
+	public List<AmountUnit> queryCurrencyList();
+	
+	
+	
+	/**
+	 * 插入报价信息
+	 * @author polo
+	 * 2017年5月24日
+	 *
+	 */
+	void insertQuotation(QuotationBean quotationBean);
+	
+
+		
+    /**
+     * 更新报价单
+     * @author polo
+     * 2017年5月24日
+     *
+     */
+	void updateQuotation(QuotationBean quotationBean);	
+	
+	
+	/**
+	 * 根据id查询报价单
+	 * @author polo
+	 * 2017年5月26日
+	 *
+	 */
+	QuotationBean queryById(Integer id);
+	
+	/**
+	 * 删除报价单
+	 * @author polo
+	 * 2017年5月26日
+	 *
+	 */
+	void deleteQuotation(Integer id);
+	
+	
+	/**
+	 * 生成备注模板
+	 * @author polo
+	 * 2017年5月24日
+	 *
+	 */
+	void insertTempRemark(QuotationRemarkTemplate quotationRemarkTemplate);
+	
+	
+	/**
+	 * 更新备注模板
+	 * @author polo
+	 * 2017年5月24日
+	 *
+	 */
+	void updateTempRemark(QuotationRemarkTemplate quotationRemarkTemplate);
+	
+	
+	/**
+	 * 查询今天的报价单数
+	 * @author polo
+	 * 2017年5月25日
+	 *
+	 */
+	int queryCurrentDateCount();
+	
+	
+	/**
+	 * 根据id查询
+	 * @author polo
+	 * 2017年5月24日
+	 *
+	 */
+	QuotationRemarkTemplate queryByRemarkId(Integer RemarkId);
+	
+	
+	/**
+	 * 当点击关闭的时候删除内容
+	 * @author polo
+	 * 2017年5月25日
+	 *
+	 */
+	void deleteTempRemarkById(Integer RemarkId);
+	
+	
+	
+	/**
+	 * 根据工厂id查询
+	 * @author polo
+	 * 2017年5月25日
+	 *
+	 */
+	List<QuotationRemarkTemplate> queryTempRemarkByFactoryId(String factoryId);
+	
+	
+	/**
+	 * 根据项目号查询
+	 * @param projectId
+	 * @return
+	 */
+	QuotationBean queryByProjectId(String projectId);
+	
+	
+	
+	
+	/**
+	 * 查询最大和最小的价格
+	 * @return
+	 */
+	Map<String, Double> queryMaxMinPrice(@Param("quotationInfoId")Integer quotationInfoId);
+	
+	
+	/**
+	 * 查询remark排序序号
+	 * @return
+	 */
+	int queryMaxRemarkIndex();
+	
+	
+	
+	
+	
+}

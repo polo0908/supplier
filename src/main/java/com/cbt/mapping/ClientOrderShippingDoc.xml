@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.ClientOrderShippingDocDao">
+
+	<resultMap id="ClientOrderShippingDocResultMap" type="com.cbt.entity.ClientOrderShippingDoc">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="order_id" property="orderId" jdbcType="VARCHAR" />
+		<result column="shipping_doc_path" property="shippingDocPath" jdbcType="VARCHAR" />
+		<result column="upload_date" property="uploadDate" jdbcType="DATE" />
+		<result column="old_or_new_shipping" property="oldOrNewShipping" jdbcType="VARCHAR" />
+		<result column="shipping_start_date" property="shippingStartDate" jdbcType="DATE" />
+		<result column="shipping_arrival_date" property="shippingArrivalDate" jdbcType="DATE" />
+		<result column="BL_available_Date" property="BLAvailableDate" jdbcType="DATE" />
+		<result column="ISF_date" property="ISFDate" jdbcType="DATE" />
+		<result column="BL_copy_path" property="BLCopyPath" jdbcType="VARCHAR" />
+		<result column="BL_copy_upload_date" property="BLCopyUploadDate" jdbcType="DATE" />
+		<result column="old_or_new_BL_copy" property="oldOrNewBLCopy" jdbcType="VARCHAR" />
+		
+		
+		<result column="form_a_path" property="formAPath" jdbcType="VARCHAR" />
+		<result column="form_a_upload_date" property="formAUploadDate" jdbcType="DATE" />
+		<result column="old_or_new_form_a" property="oldOrNewFormA" jdbcType="VARCHAR" />
+		
+		<result column="packing_list_path" property="packingListPath" jdbcType="VARCHAR" />
+		<result column="packing_list_upload_date" property="packingListUploadDate" jdbcType="DATE" />
+		<result column="old_or_new_packing_list" property="oldOrNewPackingList" jdbcType="VARCHAR" />
+		
+		<result column="invoice_path" property="invoicePath" jdbcType="VARCHAR" />
+		<result column="invoice_upload_date" property="invoiceUploadDate" jdbcType="DATE" />
+		<result column="old_or_new_invoice" property="oldOrNewInvoice" jdbcType="VARCHAR" />
+		
+		<result column="BL_path" property="BLPath" jdbcType="VARCHAR" />
+		<result column="BL_upload_date" property="BLUploadDate" jdbcType="DATE" />
+		<result column="old_or_new_BL" property="oldOrNewBL" jdbcType="VARCHAR" />
+		
+		<result column="packaging_path" property="packagingPath" jdbcType="VARCHAR" />
+		<result column="packaging_upload_date" property="packagingUploadDate" jdbcType="DATE" />
+		<result column="old_or_new_packaging" property="oldOrNewPackaging" jdbcType="VARCHAR" />
+		
+		<result column="other_path" property="otherPath" jdbcType="VARCHAR" />
+		<result column="other_upload_date" property="otherUploadDate" jdbcType="DATE" />
+		<result column="old_or_new_other" property="oldOrNewOther" jdbcType="VARCHAR" />
+		
+		<result column="destination_port" property="destinationPort" jdbcType="VARCHAR" />
+	</resultMap> 
+
+    <sql id="ClientOrderShippingDocColumnList">
+		id, order_id, shipping_doc_path, upload_date, old_or_new_shipping,shipping_start_date,
+		shipping_arrival_date,BL_available_Date,ISF_date,BL_copy_path,form_a_path,packing_list_path,
+		invoice_path,BL_path,packaging_path,other_path,BL_copy_upload_date,old_or_new_BL_copy,form_a_upload_date,
+		old_or_new_form_a,packing_list_upload_date,old_or_new_packing_list,invoice_upload_date,old_or_new_invoice,
+		BL_upload_date,old_or_new_BL,packaging_upload_date,old_or_new_packaging,other_upload_date,old_or_new_other,
+		destination_port
+	</sql>   
+
+    
+    <!-- 根据id查询 -->
+    <select id="queryByClientOrderId" resultMap="ClientOrderShippingDocResultMap" parameterType="string">
+          select 
+          <include refid="ClientOrderShippingDocColumnList"/> 
+          from client_order_shippingDoc 
+          where order_id = #{orderId,jdbcType=VARCHAR} order by shipping_start_date desc 
+    </select>
+    
+       <!-- 根据id查询 -->
+    <select id="queryById" parameterType="int" resultMap="ClientOrderShippingDocResultMap">
+          select <include refid="ClientOrderShippingDocColumnList"/>  
+           from client_order_shippingDoc where id = #{id,jdbcType=INTEGER} 
+    </select> 
+    
+    	<!-- 	   批量插入shipping报告-->
+	<insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+	    insert into client_order_shippingDoc 
+		    (
+		    id,order_id, shipping_doc_path, upload_date, old_or_new_shipping,shipping_start_date,
+		    shipping_arrival_date,BL_available_Date,ISF_date
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		     #{item.id},#{item.orderId},#{item.shippingDocPath},#{item.uploadDate},#{item.oldOrNewShipping},
+		    #{item.shippingStartDate},#{item.shippingArrivalDate},#{item.BLAvailableDate},#{item.ISFDate}
+	      )
+	    </foreach>
+	    
+	    <selectKey resultType="int"  order="AFTER"  keyProperty="id">
+            SELECT LAST_INSERT_ID()  AS  id	    
+	    </selectKey>
+	</insert>
+	
+	    	<!-- 插入shipping报告-->
+	<insert id="insert" parameterType="com.cbt.entity.ClientOrderShippingDoc" useGeneratedKeys="true" keyProperty="id">
+	    insert into client_order_shippingDoc 
+		    (
+		    order_id, shipping_doc_path, upload_date, old_or_new_shipping,shipping_start_date,
+		    shipping_arrival_date,BL_available_Date,ISF_date,destination_port
+            )
+	    values
+	    
+	      (           
+		     #{orderId,jdbcType=VARCHAR},#{shippingDocPath,jdbcType=VARCHAR},
+		     #{uploadDate,jdbcType=DATE},#{oldOrNewShipping,jdbcType=VARCHAR},
+		     #{shippingStartDate,jdbcType=DATE},#{shippingArrivalDate,jdbcType=DATE},
+		     #{BLAvailableDate,jdbcType=DATE},#{ISFDate,jdbcType=DATE},#{destinationPort,jdbcType=VARCHAR}
+	      )
+	</insert>
+    
+    
+    
+    
+    <!-- 删除 -->
+    <delete id="deleteById" parameterType="int">
+       delete from client_order_shippingDoc where id = #{id,jdbcType=INTEGER}        
+    </delete>
+    
+    <!-- 根据起运时间和订单号查询（判断是否存在重复shipping数据） -->
+    <select id="queryBySailDateAndOrderId" resultType="int">
+       select count(id) from client_order_shippingDoc   
+       where 
+       order_id = #{orderId,jdbcType=VARCHAR}  
+       and 
+       shipping_start_date = #{shippingStartDate,jdbcType=DATE}
+    </select>
+	
+	
+	      <!-- 更新milestone数据 -->
+    <update id="updateShippingDoc" parameterType="com.cbt.entity.ClientOrderShippingDoc">
+	    update client_order_shippingDoc  
+		<set> 
+	    <if test="BLAvailableDate != null">
+			BL_available_Date = #{BLAvailableDate,jdbcType=DATE},
+		</if>
+	    <if test="shippingStartDate != null">
+			shipping_start_date = #{shippingStartDate,jdbcType=DATE},
+		</if>
+	    <if test="shippingArrivalDate != null">
+			shipping_arrival_date = #{shippingArrivalDate,jdbcType=DATE},
+		</if>
+	    <if test="ISFDate != null">
+			ISF_date = #{ISFDate,jdbcType=DATE},
+		</if>
+		 <if test="BLCopyPath != null">
+			BL_copy_path = #{BLCopyPath,jdbcType=VARCHAR},
+		</if>
+		  <if test="formAPath != null">
+			form_a_path = #{formAPath,jdbcType=VARCHAR},
+		</if>
+		  <if test="packingListPath != null">
+			packing_list_path = #{packingListPath,jdbcType=VARCHAR},
+		</if>
+		  <if test="invoicePath != null">
+			invoice_path = #{invoicePath,jdbcType=VARCHAR},
+		</if>
+		  <if test="BLPath != null">
+			BL_path = #{BLPath,jdbcType=VARCHAR},
+		</if>
+		  <if test="packagingPath != null">
+			packaging_path = #{packagingPath,jdbcType=VARCHAR},
+		</if>
+		  <if test="otherPath != null">
+			other_path = #{otherPath,jdbcType=VARCHAR},
+		</if>
+		
+		<if test="BLCopyUploadDate != null">
+			BL_copy_upload_date = #{BLCopyUploadDate,jdbcType=DATE},
+		</if>
+		<if test="formAUploadDate != null">
+			form_a_upload_date = #{formAUploadDate,jdbcType=DATE},
+		</if>
+		<if test="packingListUploadDate != null">
+			packing_list_upload_date = #{packingListUploadDate,jdbcType=DATE},
+		</if>
+		<if test="invoiceUploadDate != null">
+			invoice_upload_date = #{invoiceUploadDate,jdbcType=DATE},
+		</if>
+		<if test="BLUploadDate != null">
+			BL_upload_date = #{BLUploadDate,jdbcType=DATE},
+		</if>
+		<if test="packagingUploadDate != null">
+			packaging_upload_date = #{packagingUploadDate,jdbcType=DATE},
+		</if>
+		<if test="otherUploadDate != null">
+			other_upload_date = #{otherUploadDate,jdbcType=DATE},
+		</if>
+		<if test="oldOrNewBLCopy != null">
+			old_or_new_BL_copy = #{oldOrNewBLCopy,jdbcType=VARCHAR},
+		</if>
+		<if test="oldOrNewFormA != null">
+			old_or_new_form_a = #{oldOrNewFormA,jdbcType=VARCHAR},
+		</if>
+		<if test="oldOrNewPackingList != null">
+			old_or_new_packing_list = #{oldOrNewPackingList,jdbcType=VARCHAR},
+		</if>
+		<if test="oldOrNewInvoice != null">
+			old_or_new_invoice = #{oldOrNewInvoice,jdbcType=VARCHAR},
+		</if>
+		<if test="oldOrNewBL != null">
+			old_or_new_BL = #{oldOrNewBL,jdbcType=VARCHAR},
+		</if>
+		<if test="oldOrNewPackaging != null">
+			old_or_new_packaging = #{oldOrNewPackaging,jdbcType=VARCHAR},
+		</if>
+		<if test="oldOrNewOther != null">
+			old_or_new_other = #{oldOrNewOther,jdbcType=VARCHAR},
+		</if>
+		<if test="destinationPort != null">
+			destination_port = #{destinationPort,jdbcType=VARCHAR},
+		</if>
+		
+       </set>
+        where id = #{id,jdbcType=INTEGER}	 
+    </update>
+    
+</mapper>

@@ -1,0 +1,319 @@
+package com.cbt.entity;
+
+import java.io.Serializable;
+import java.util.List;
+
+/**
+ * 报价单商品信息
+ * @author tb
+ * @time 2017.3.28
+ */
+public class QuotationProductionBean implements Serializable {
+
+	private static final long serialVersionUID = -8570984871157528433L;
+
+	private Integer id;//报价商品id
+	
+	private Integer quotationInfoId;//报价单表id
+	
+	private String productName;//产品名
+	
+	private Double moldPrice;//模具价格
+	
+	private String productNotes;//产品说明
+	
+	private String material;    //材质
+	
+	private String updateTime;  //更新时间 
+	
+	private Integer priceStatus; //价格是否更新（0：未更新 1：已更新）	
+	
+	private Double materialUnitPrice;         //单位价格
+	
+	private Double materialLoss;      //材料耗损
+	
+	private Double factoryPrice;     //预估价格
+	
+    private Integer point;           //产品穴数
+    
+    private Double rejectionRate;     //报废率
+	
+	private Double moldProfitRate;    //模具利润率
+    
+    private Double moldFactoryPrice;  //模具工厂价
+    
+    private String processList;        //全部工艺
+    
+    
+	private List<QuotationProductionPriceBean> quotationProductionPriceBeanList;
+
+
+
+
+	
+	public String getProcessList() {
+		return processList;
+	}
+
+
+
+
+	public void setProcessList(String processList) {
+		this.processList = processList;
+	}
+
+
+
+
+	public Double getMoldFactoryPrice() {
+		return moldFactoryPrice;
+	}
+
+
+
+
+	public void setMoldFactoryPrice(Double moldFactoryPrice) {
+		this.moldFactoryPrice = moldFactoryPrice;
+	}
+
+
+
+
+	public Integer getId() {
+		return id;
+	}
+
+
+
+
+	public Double getMoldProfitRate() {
+		return moldProfitRate;
+	}
+
+
+
+
+	public void setMoldProfitRate(Double moldProfitRate) {
+		this.moldProfitRate = moldProfitRate;
+	}
+
+
+
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+
+
+
+	public Integer getQuotationInfoId() {
+		return quotationInfoId;
+	}
+
+
+
+
+	public void setQuotationInfoId(Integer quotationInfoId) {
+		this.quotationInfoId = quotationInfoId;
+	}
+
+
+
+
+	public String getProductName() {
+		return productName;
+	}
+
+
+
+
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
+
+
+
+
+	public Double getMoldPrice() {
+		return moldPrice;
+	}
+
+
+
+
+	public void setMoldPrice(Double moldPrice) {
+		this.moldPrice = moldPrice;
+	}
+
+
+
+
+	public String getProductNotes() {
+		return productNotes;
+	}
+
+
+
+
+	public void setProductNotes(String productNotes) {
+		this.productNotes = productNotes;
+	}
+
+
+
+
+	public String getMaterial() {
+		return material;
+	}
+
+
+
+
+	public void setMaterial(String material) {
+		this.material = material;
+	}
+
+
+
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+
+
+
+	public void setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+	}
+
+
+
+
+	public Integer getPriceStatus() {
+		return priceStatus;
+	}
+
+
+
+
+	public void setPriceStatus(Integer priceStatus) {
+		this.priceStatus = priceStatus;
+	}
+
+
+
+
+	public Double getMaterialUnitPrice() {
+		return materialUnitPrice;
+	}
+
+
+
+
+	public void setMaterialUnitPrice(Double materialUnitPrice) {
+		this.materialUnitPrice = materialUnitPrice;
+	}
+
+
+
+
+	public Double getMaterialLoss() {
+		return materialLoss;
+	}
+
+
+
+
+	public void setMaterialLoss(Double materialLoss) {
+		this.materialLoss = materialLoss;
+	}
+
+
+
+
+	public Double getFactoryPrice() {
+		return factoryPrice;
+	}
+
+
+
+
+	public void setFactoryPrice(Double factoryPrice) {
+		this.factoryPrice = factoryPrice;
+	}
+
+
+
+
+	public List<QuotationProductionPriceBean> getQuotationProductionPriceBeanList() {
+		return quotationProductionPriceBeanList;
+	}
+
+
+
+
+	public void setQuotationProductionPriceBeanList(
+			List<QuotationProductionPriceBean> quotationProductionPriceBeanList) {
+		this.quotationProductionPriceBeanList = quotationProductionPriceBeanList;
+	}
+
+
+
+
+
+
+
+	public Integer getPoint() {
+		return point;
+	}
+
+
+
+
+	public void setPoint(Integer point) {
+		this.point = point;
+	}
+
+
+
+
+	public Double getRejectionRate() {
+		return rejectionRate;
+	}
+
+
+
+
+	public void setRejectionRate(Double rejectionRate) {
+		this.rejectionRate = rejectionRate;
+	}
+
+
+
+
+	@Override
+	public String toString() {
+		return "QuotationProductionBean [id=" + id + ", quotationInfoId="
+				+ quotationInfoId + ", productName=" + productName
+				+ ", moldPrice=" + moldPrice + ", productNotes=" + productNotes
+				+ ", material=" + material + ", updateTime=" + updateTime
+				+ ", priceStatus=" + priceStatus + ", materialUnitPrice="
+				+ materialUnitPrice + ", materialLoss=" + materialLoss
+				+ ", factoryPrice=" + factoryPrice + ", point=" + point
+				+ ", rejectionRate=" + rejectionRate + ", moldProfitRate="
+				+ moldProfitRate + ", moldFactoryPrice=" + moldFactoryPrice
+				+ ", processList=" + processList
+				+ ", quotationProductionPriceBeanList="
+				+ quotationProductionPriceBeanList + "]";
+	}
+	
+	
+	
+   
+	
+	
+	
+	
+}

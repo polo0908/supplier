@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.BackUserDao">
+
+
+	<resultMap id="BackUserResultMap" type="com.cbt.entity.BackUser">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="backuserId" property="backUserid" jdbcType="VARCHAR" />
+		<result column="username" property="userName" jdbcType="VARCHAR" />
+		<result column="real_name" property="realName" jdbcType="VARCHAR" />
+		<result column="pwd" property="pwd" jdbcType="VARCHAR" />
+		<result column="email" property="email" jdbcType="VARCHAR" />
+		<result column="tel" property="tel" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="update_user" property="updateUser" jdbcType="VARCHAR" />
+		<result column="permission" property="permission" jdbcType="INTEGER" />
+		<result column="factory_id" property="factoryId" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="BackUserColumnList">
+		id, backuserId, username, real_name,pwd,email, tel,
+		create_time, remark,update_time,update_user,permission,factory_id
+	</sql>
+
+	<!-- 查询用户分页显示 -->
+	<select id="queryBackUserList" resultMap="BackUserResultMap">
+		select
+		<include refid="BackUserColumnList" />
+		from back_user
+		where 1=1
+
+		<if test="info != null and info != ''">
+			and
+			username like
+			CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+			or backuserId like
+			CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+			or real_name like
+			CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+			or tel like
+			CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+		</if>
+		and factory_id = #{factoryId,jdbcType=VARCHAR}
+		order by permission
+		limit #{start},#{pageSize}
+	</select>
+
+	<!-- 查询用户总数 -->
+	<select id="queryBackUserTotal" resultType="java.lang.Integer">
+		select count(*)
+		from
+		back_user
+		where 1=1 
+		<if test="info != null and info != ''">
+			and
+			username like
+			CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+			or real_name like
+			CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+			or tel like
+			CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+		</if>
+	     and factory_id = #{factoryId,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 根据Id查询用户 -->
+	<select id="queryBackUserById" resultMap="BackUserResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="BackUserColumnList" />
+		from back_user
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<!-- 根据name查询用户 -->
+	<select id="queryBackUserByName" resultMap="BackUserResultMap"
+		parameterType="string">
+		select
+		<include refid="BackUserColumnList" />
+		from back_user 
+		where username = #{userName,jdbcType=VARCHAR} 
+	</select>
+	<!-- 根据userId查询用户 -->
+	<select id="queryBackUserByUserId" resultMap="BackUserResultMap"
+		parameterType="string">
+		select
+		<include refid="BackUserColumnList" />
+		from back_user 
+		where backuserId = #{userId,jdbcType=VARCHAR} 
+	</select>
+	
+	
+	<!-- 根据用户名和密码查询用户 -->
+	<select id="queryBackUserByNameAndPsw" resultMap="BackUserResultMap">
+		select
+		<include refid="BackUserColumnList" />
+		from back_user
+		where username = #{username,jdbcType=VARCHAR}
+		and pwd = #{pwd,jdbcType=VARCHAR}
+	</select>
+	
+	
+
+	<!-- 插入用户数据 -->
+	<insert id="insertBackUser" parameterType="com.cbt.entity.BackUser"  useGeneratedKeys="true" keyProperty="id">
+		insert into
+		back_user
+		(username,real_name,pwd,email,tel,create_time,remark,permission,factory_id,update_user)
+		values
+		(#{userName,jdbcType=VARCHAR},#{realName,jdbcType=VARCHAR},#{pwd,jdbcType=VARCHAR},#{email,jdbcType=VARCHAR},
+		#{tel,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP},#{remark,jdbcType=VARCHAR},#{permission,jdbcType=INTEGER},
+		#{factoryId,jdbcType=VARCHAR},#{updateUser,jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 更新用户信息 -->
+	<update id="updateBackUser" parameterType="com.cbt.entity.BackUser">
+		update back_user
+		<set>
+			<if test="backUserid != null">
+				backuserId = #{backUserid,jdbcType=VARCHAR},
+			</if>
+			<if test="userName != null">
+				username = #{userName,jdbcType=VARCHAR},
+			</if>
+			<if test="realName != null">
+				real_name = #{realName,jdbcType=VARCHAR},
+			</if>
+			<if test="pwd != null">
+				pwd = #{pwd,jdbcType=VARCHAR},
+			</if>
+			<if test="email != null">
+				email = #{email,jdbcType=VARCHAR},
+			</if>
+			<if test="tel != null">
+				tel = #{tel,jdbcType=VARCHAR},
+			</if>
+			<if test="remark != null">
+				remark = #{remark,jdbcType=VARCHAR},
+			</if>
+			<if test="permission != null">
+				permission = #{permission,jdbcType=VARCHAR},
+			</if>
+			<if test="updateTime != null">
+				update_time = #{updateTime,jdbcType=VARCHAR},
+			</if>
+			<if test="updateUser != null">
+				update_user = #{updateUser,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER} 
+	</update>
+
+	<delete id="deleteBackUserById" parameterType="java.lang.Integer">
+		delete from
+		back_user
+		where
+		id = #{id,jdbcType=INTEGER}
+	</delete>
+
+</mapper>

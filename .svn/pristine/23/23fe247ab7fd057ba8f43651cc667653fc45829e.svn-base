@@ -1,0 +1,376 @@
+package com.cbt.util;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+
+/**
+ * @Description 操作文件工具类
+ * @author POLO
+ * @Date 2016年11月8日 上午11:42:44
+ * @Version v1.0
+ */
+public final class OperationFileUtil {
+    private static final String ENCODING = "utf-8";
+
+    /**
+     * 文件下载
+     * 
+     * @param filePath
+     *            文件路径
+     * @return
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     */
+    public static ResponseEntity<byte[]> download(String filePath) throws UnsupportedEncodingException, IOException {
+        String fileName = FilenameUtils.getName(filePath);
+        return downloadAssist(filePath, fileName);
+    }
+
+    /**
+     * 文件下载
+     * 
+     * @param filePath
+     *            文件路径
+     * @param fileName
+     *            文件名
+     * @return
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     */
+    public static ResponseEntity<byte[]> download(String filePath, String fileName) throws UnsupportedEncodingException, IOException {
+        return downloadAssist(filePath, fileName);
+    }
+
+    /**
+     * 文件下载辅助
+     * 
+     * @param filePath
+     *            文件路径
+     * @param fileName
+     *            文件名
+     * @return
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     */
+    private static ResponseEntity<byte[]> downloadAssist(String filePath, String fileName) throws UnsupportedEncodingException, IOException {
+        File file = new File(filePath);
+        if (!file.isFile() || !file.exists()) {
+            throw new IllegalArgumentException("filePath 参数必须是真实存在的文件路径:" + filePath);
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", URLEncoder.encode(fileName, ENCODING));
+        return new ResponseEntity<byte[]>(FileUtils.readFileToByteArray(file), headers, HttpStatus.OK);
+    }
+    /**
+     * 多文件上传
+     * 
+     * @param request
+     *            当前上传的请求
+     * @param basePath
+     *            保存文件的路径
+     * @throws IOException
+     * @throws IllegalStateException
+     * @return Map<String, String> 返回上传文件的保存路径 以文件名做map的key;文件保存路径作为map的value
+     */
+    public static Map<String, String> multiFileUpload(HttpServletRequest request, String basePath) throws IllegalStateException, IOException {
+        if (!(new File(basePath).isDirectory())) {
+            throw new IllegalArgumentException("basePath 参数必须是文件夹路径");
+        }
+        return multifileUploadAssist(request, basePath, null);
+    }
+    /**
+     * 多文件上传(带时间节点显示)
+     * 
+     * @param request
+     *            当前上传的请求
+     * @param basePath
+     *            保存文件的路径
+     * @throws IOException
+     * @throws IllegalStateException
+     * @return Map<String, String> 返回上传文件的保存路径 以文件名做map的key;文件保存路径作为map的value
+     */
+    public static Map<String, String> multiFileUpload1(HttpServletRequest request, String basePath) throws IllegalStateException, IOException {
+    	if (!(new File(basePath).isDirectory())) {
+    		throw new IllegalArgumentException("basePath 参数必须是文件夹路径");
+    	}
+    	return multifileUploadAssist1(request, basePath, null);
+    }
+
+    /**
+     * 多文件上传
+     * 
+     * @param request
+     *            当前上传的请求
+     * @param basePath
+     *            保存文件的路径
+     * @param exclude
+     *            排除文件名字符串,以逗号分隔的,默认无可传null
+     * @return
+     * @throws IllegalStateException
+     * @throws IOException
+     */
+    public static Map<String, String> multiFileUpload(HttpServletRequest request, String basePath, String exclude) throws IllegalStateException, IOException {
+        if (!(new File(basePath).isDirectory())) {
+            throw new IllegalArgumentException("basePath 参数必须是文件夹路径");
+        }
+
+        return multifileUploadAssist(request, basePath, exclude);
+    }
+
+    /**
+     * 多文件上传辅助
+     * 
+     * @param request
+     *            当前上传的请求
+     * @param basePath
+     *            保存文件的路径
+     * @param exclude
+     *            排除文件名字符串,以逗号分隔的,默认无可传null
+     * @return
+     * @throws IOException
+     */
+    private static Map<String, String> multifileUploadAssist(HttpServletRequest request, String basePath, String exclude) throws IOException {
+        exclude = exclude == null ? "" : exclude;
+
+        Map<String, String> filePaths = new HashMap<String, String>();
+        File file = null;
+        // 创建一个通用的多部分解析器
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());
+
+        // 判断 request 是否有文件上传,即多部分请求
+        if (multipartResolver.isMultipart(request)) {
+            // 转换成多部分request
+            MultipartHttpServletRequest multiRequest = (MultipartHttpServletRequest) request;
+            // get the parameter names of the MULTIPART files contained in this request
+            Iterator<String> iter = multiRequest.getFileNames();
+            while (iter.hasNext()) {
+                // 取得上传文件
+                List<MultipartFile> multipartFiles = multiRequest.getFiles(iter.next());
+                for (MultipartFile multipartFile : multipartFiles) {
+                    String fileName = multipartFile.getOriginalFilename();
+                    if (StringUtils.isNotEmpty(fileName) && (!exclude.contains(fileName))) {
+                    	
+                        file = new File(basePath + fileName);
+                        filePaths.put(fileName, file.getPath());
+                        multipartFile.transferTo(file);
+                    }
+                }
+            }
+        }
+        return filePaths;
+    }
+  
+    
+    /**
+     * 多文件上传辅助(带时间节点显示)
+     * 
+     * @param request
+     *            当前上传的请求
+     * @param basePath
+     *            保存文件的路径
+     * @param exclude
+     *            排除文件名字符串,以逗号分隔的,默认无可传null
+     * @return
+     * @throws IOException
+     */
+    private static Map<String, String> multifileUploadAssist1(HttpServletRequest request, String basePath, String exclude) throws IOException {
+        exclude = exclude == null ? "" : exclude;
+        request.setCharacterEncoding("utf-8");
+        Map<String, String> filePaths = new HashMap<String, String>();
+        File file = null;
+        // 创建一个通用的多部分解析器
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());
+        // 判断 request 是否有文件上传,即多部分请求
+        if (multipartResolver.isMultipart(request)) {
+            // 转换成多部分request
+            MultipartHttpServletRequest multiRequest = (MultipartHttpServletRequest) request;
+            // get the parameter names of the MULTIPART files contained in this request
+            Iterator<String> iter = multiRequest.getFileNames();
+           
+            while (iter.hasNext()) {
+                // 取得上传文件
+                List<MultipartFile> multipartFiles = multiRequest.getFiles(iter.next());
+                for (MultipartFile multipartFile : multipartFiles) {
+                    String fileName = multipartFile.getOriginalFilename();
+                    if (StringUtils.isNotEmpty(fileName) && (!exclude.contains(fileName))) {
+                    	String fileNameToTime = changeFilenameTime(fileName);
+                        file = new File(basePath + fileNameToTime);
+//                        filePaths.put(fileName, file.getPath());
+                        filePaths.put(fileName, fileNameToTime);
+                        multipartFile.transferTo(file);
+                    }
+                }
+            }
+        }
+        return filePaths;
+    }
+    
+    
+    
+    
+    
+
+    
+    
+    /**
+     * 将文件名转变加时间节点命名的 ,保留文件后缀(时间：20161108103931)
+     * 
+     * @param filename
+     * @return
+     */
+    public static String changeFilenameTime(String filename) {
+    	long time = System.currentTimeMillis();
+    	Date date = new Date(time);    	
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        return FilenameUtils.removeExtension(filename)+'&'+sdf.format(date) + "." + FilenameUtils.getExtension(filename);
+    }
+    
+    /**
+     * 将文件名转变为_compress,保留文件后缀(时间：123_compress.img)
+     * 
+     * @param filename
+     * @return
+     */
+    public static String changeFilenameZip(String filename) {
+    	return FilenameUtils.removeExtension(filename)+"_compress" + "." + FilenameUtils.getExtension(filename);
+    }
+    
+    /**
+     * 将压缩文件名转换正常
+     * @param filename
+     * @return
+     */
+    public static String changeZipName(String filename) {
+    	
+    	String removeExtension = FilenameUtils.removeExtension(filename);
+    	removeExtension = removeExtension.replace("_compress","");
+    	return removeExtension + "." + FilenameUtils.getExtension(filename);
+    }
+
+    /**
+     * 删除文件
+     * 
+     * @param filePath
+     */
+    public static void deleteFile(String filePath) {
+        try {
+            File file = new File(filePath);
+            if (file.exists() && file.isFile()) {
+                file.delete();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+	private ServletContext servletContext;
+    
+
+    public static void fileDownload(HttpServletResponse response,String path){  
+        //获取网站部署路径(通过ServletContext对象)，用于确定下载文件位置，从而实现下载  
+//        String path = servletContext.getRealPath("/");  
+  
+        //1.设置文件ContentType类型，这样设置，会自动判断下载文件类型  
+        response.setContentType("multipart/form-data");  
+//        //2.设置文件头：最后一个参数是设置下载文件名(假如我们叫a.pdf)  
+//        response.setHeader("Content-Disposition", "attachment;fileName="+"a.pdf");  
+        ServletOutputStream out;  
+        //通过文件路径获得File对象(假如此路径中有一个download.pdf文件)  
+        File file = new File(path);  
+  
+        try {  
+            FileInputStream inputStream = new FileInputStream(file);  
+  
+            //3.通过response获取ServletOutputStream对象(out)  
+            out = response.getOutputStream();  
+  
+            int b = 0;  
+            byte[] buffer = new byte[512];  
+            while (b != -1){  
+                b = inputStream.read(buffer);  
+                //4.写到输出流(out)中  
+                out.write(buffer,0,b);  
+            }  
+            inputStream.close();  
+            out.close();  
+            out.flush();  
+  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+    }  
+  
+    public void setServletContext(ServletContext servletContext) {  
+        this.servletContext = servletContext;  
+    }  
+    
+
+    
+   
+    /** 
+    * 复制单个文件 
+    * @param oldPath String 原文件路径 如：c:/fqf.txt 
+    * @param newPath String 复制后路径 如：f:/fqf.txt 
+    * @return boolean 
+    */ 
+    public static void copyFile(String oldPath, String newPath) { 
+    try { 
+    int bytesum = 0; 
+    int byteread = 0; 
+    File oldfile = new File(oldPath); 
+    if (oldfile.exists()) { //文件存在时 
+    InputStream inStream = new FileInputStream(oldPath); //读入原文件 
+    FileOutputStream fs = new FileOutputStream(newPath); 
+    byte[] buffer = new byte[1444]; 
+    int length; 
+    while ( (byteread = inStream.read(buffer)) != -1) { 
+    bytesum += byteread; //字节数 文件大小 
+    System.out.println(bytesum); 
+    fs.write(buffer, 0, byteread); 
+    } 
+    inStream.close(); 
+    } 
+    } 
+    catch (Exception e) { 
+    System.out.println("复制单个文件操作出错"); 
+    e.printStackTrace(); 
+
+    } 
+
+    } 
+
+    
+    
+    
+    
+}  
+          
+          
+

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.SaleCustomerDao">
+
+	<resultMap id="SaleCustomerResultMap" type="com.cbt.entity.SaleCustomer">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="salesId" property="salesId" jdbcType="VARCHAR" />
+		<result column="userid" property="userid" jdbcType="VARCHAR" />
+	</resultMap> 
+	
+	<resultMap id="saleOrderMap" type="com.cbt.entity.SaleOrder">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="salesId" property="salesId" jdbcType="VARCHAR" />
+		<result column="order_id" property="orderId" jdbcType="VARCHAR" />
+	</resultMap> 
+
+        <!-- 根据salesId查询 -->
+    <select id="queryBySalesId" resultMap="SaleCustomerResultMap" parameterType="string">
+          select * from sale_customer where salesId = #{salesId,jdbcType=VARCHAR}       
+    </select>
+	
+	        <!-- 根据销售id和客户id查询 -->
+    <select id="queryCountBySaleAndCustomer" resultType="int">
+          select count(*) from sale_customer where salesId = #{salesId,jdbcType=VARCHAR}  and userid = #{userid,jdbcType=VARCHAR}   
+    </select>
+    
+	        <!-- 根据销售id和客户id查询 -->
+    <select id="queryBySaleAndCustomer" resultMap="SaleCustomerResultMap">
+          select * from sale_customer where salesId = #{salesId,jdbcType=VARCHAR}  and userid = #{userid,jdbcType=VARCHAR}   
+    </select>
+	
+	
+	<insert id="insert" parameterType="com.cbt.entity.SaleCustomer">
+	   insert into sale_customer
+	   (salesId,userid)
+	   values
+	     (
+	      #{salesId,jdbcType=VARCHAR},
+	      #{userid,jdbcType=VARCHAR}
+	     )
+	</insert>
+	
+	
+		
+	<!-- 	   批量插入关联关系 -->
+	<insert id="insertBatch" parameterType="java.util.List">
+	    insert into sale_customer 
+		    (
+		    salesId, userid
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.salesId},#{item.userid}
+	      )
+	    </foreach>
+	</insert>
+	
+	
+	<update id="update" parameterType="com.cbt.entity.SaleCustomer">
+	      update sale_customer
+	      <set>
+	       <if test="salesId != null">
+			salesId = #{salesId,jdbcType=VARCHAR},
+		   </if>
+	       <if test="userid != null">
+			userid = #{userid,jdbcType=VARCHAR},
+		   </if>
+	      </set>
+		 where id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	
+		<!--批量插入销售订单关联关系 -->
+	<insert id="insertSaleOrderBatch" parameterType="java.util.List">
+	    insert into sale_order 
+		    (
+		    salesId, order_id
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.salesId},#{item.orderId}
+	      )
+	    </foreach>
+	</insert>
+	
+	
+	
+		<!-- 根据销售id和订单号查询 -->
+    <select id="queryCountBySaleAndOrder" resultType="int">
+          select count(*) from sale_order where salesId = #{salesId,jdbcType=VARCHAR}  and order_id = #{orderId,jdbcType=VARCHAR}   
+    </select>
+    
+		<!-- 根据销售id和订单号查询 -->
+    <select id="queryBySaleAndOrder" resultMap="saleOrderMap">
+          select * from sale_order where salesId = #{salesId,jdbcType=VARCHAR}  and order_id = #{orderId,jdbcType=VARCHAR}   
+    </select>
+    
+    
+    <update id="updateSaleOrder" parameterType="com.cbt.entity.SaleOrder">
+      update sale_order
+	      <set>
+	       <if test="salesId != null">
+			salesId = #{salesId,jdbcType=VARCHAR},
+		   </if>	     
+	      </set>
+		 where id = #{id,jdbcType=INTEGER}
+    
+    
+    </update>
+    
+    
+    
+</mapper>

@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.UserDao">
+
+
+	<resultMap id="UserMap" type="com.cbt.entity.User">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="userid" property="userid" jdbcType="VARCHAR" />
+		<result column="username" property="userName" jdbcType="VARCHAR" />
+		<result column="pwd" property="pwd" jdbcType="VARCHAR" />
+		<result column="email" property="email" jdbcType="VARCHAR" />
+		<result column="email1" property="email1" jdbcType="VARCHAR" />
+		<result column="login_email" property="loginEmail" jdbcType="VARCHAR" />
+        <result column="tel" property="tel" jdbcType="VARCHAR" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="token" property="token" jdbcType="VARCHAR" />
+        <result column="company_name" property="companyName" jdbcType="VARCHAR" />
+        <result column="temp_user" property="tempUser" jdbcType="INTEGER" />
+        <result column="encrypted_email" property="encryptedEmail" jdbcType="INTEGER" />
+        
+        
+        <result column="min_time" property="minTime" jdbcType="DATE" />
+        <result column="max_time" property="maxTime" jdbcType="DATE" />
+	</resultMap>
+
+	<sql id="UserColumnList">
+		id, userid, username, 
+		pwd, email, email1, login_email, tel, update_time, create_time, token, company_name,temp_user,encrypted_email 
+	</sql>
+	    
+
+<!--   批量插入user数据 -->
+	<insert id="insertUser" parameterType="java.util.List">
+	insert into user 
+		    (    
+	         userid, 
+	         username, pwd,login_email,
+	         email, email1, tel, update_time, create_time, token ,company_name,temp_user,encrypted_email 
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.userid}, 
+            #{item.userName},#{item.pwd},
+		    #{item.loginEmail}, 
+		    #{item.email}, 
+		    #{item.email1}, 
+		    #{item.tel}, 
+		    #{item.updateTime},  
+		    #{item.createTime},  
+		    #{item.token}, 
+		    #{item.companyName},  
+		    #{item.tempUser},
+		    #{item.encryptedEmail}
+	      )
+	    </foreach>
+	</insert>
+	
+<!--   单个插入用户 -->
+	<insert id="insertUserByAdmin" parameterType="com.cbt.entity.User">
+	    insert into user 
+		    (    
+             userid, username, pwd, email, email1, 
+             login_email, tel, update_time, create_time, 
+             token, company_name,temp_user,encrypted_email
+            )
+	    values
+	       (             
+		    #{userid,jdbcType=VARCHAR}, 
+		    #{userName,jdbcType=VARCHAR}, 
+		    #{pwd,jdbcType=VARCHAR}, 
+		    #{email,jdbcType=VARCHAR}, 
+		    #{email1,jdbcType=VARCHAR}, 
+		    #{loginEmail,jdbcType=VARCHAR}, 
+		    #{tel,jdbcType=VARCHAR},   
+		    #{updateTime,jdbcType=TIMESTAMP}, 
+		    #{createTime,jdbcType=TIMESTAMP},
+		    #{token,jdbcType=VARCHAR},
+		    #{companyName,jdbcType=VARCHAR}, 
+		    #{tempUser,jdbcType=INTEGER},
+		    #{encryptedEmail,jdbcType=VARCHAR}
+	       )
+	       
+	</insert>
+
+<!-- 查询用户分页显示 -->
+	<select id="queryUserList" resultMap="UserMap">
+	
+<!-- 	select p.* from  -->
+<!-- 		( -->
+<!-- 		select * from (select u.*,f.factory_id from user u inner JOIN factory_user_relation f on u.userid = f.userid)q where factory_id = #{factoryId,jdbcType=VARCHAR} -->
+<!-- 		)p INNER JOIN sale_customer s on p.userid = s.userid where s.salesId = #{salesId,jdbcType=VARCHAR} -->
+<!-- 		<if test="info != null and info != ''"> -->
+<!-- 			and -->
+<!-- 			p.userid like -->
+<!-- 			CONCAT('%',#{info,jdbcType=VARCHAR},'%') -->
+<!-- 			or p.company_name like -->
+<!-- 			CONCAT('%',#{info,jdbcType=VARCHAR},'%') -->
+<!-- 		</if> -->
+<!-- 		order by id -->
+<!-- 		limit #{start},#{pageSize} -->
+		
+		
+		select sd.*,min(time) as min_time,max(time) as max_time from 
+		(
+			select us.*,c.create_time as time from 
+			(
+			select p.* from 
+					(
+					select * from (select u.*,f.factory_id from user u inner JOIN factory_user_relation f on u.userid = f.userid)q 
+					)p INNER JOIN sale_customer s on p.userid = s.userid where s.salesId = #{salesId,jdbcType=VARCHAR} 
+			)us 
+			left JOIN client_order c  on us.userid = c.userid 
+		)sd  where 1 = 1
+			<if test="info != null and info != ''">
+				and
+				sd.userid like
+				CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+				or sd.company_name like
+				CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+			</if>
+			group by sd.userid order by sd.id 
+	        limit #{start},#{pageSize}
+	</select>
+	
+	
+	<!-- 根据销售id查询客户 -->
+	<select id="queryUserBySalesId" resultMap="UserMap">	
+	select p.* from 
+		(
+		select * from (select u.*,f.factory_id from user u inner JOIN factory_user_relation f on u.userid = f.userid)q 
+		  where factory_id = #{factoryId,jdbcType=VARCHAR}
+		)p INNER JOIN sale_customer s on p.userid = s.userid where s.salesId = #{salesId,jdbcType=VARCHAR}
+		order by id desc
+	
+	</select>
+	
+	
+	<!-- 根据销售id查询客户 (管理员查询)-->
+	<select id="queryUserBySalesIdAdmin" resultMap="UserMap">
+	
+    select p.* from 
+    (select u.*,f.factory_id from user u inner JOIN factory_user_relation f on u.userid = f.userid)p where factory_id = #{factoryId,jdbcType=VARCHAR}  	
+	and EXISTS(select permission from back_user where backuserId = #{salesId,jdbcType=VARCHAR} and permission=1) 
+	order by id desc
+	</select>
+	
+
+	<!-- 查询用户总数 -->
+	<select id="queryUserTotal" resultType="java.lang.Integer">
+	select count(*) from 
+	(
+		select sd.*,min(time) as min_time,max(time) as max_time from 
+		(
+			select us.*,c.create_time as time from 
+			(
+			select p.* from 
+					(
+					select * from (select u.*,f.factory_id from user u inner JOIN factory_user_relation f on u.userid = f.userid)q 
+					)p INNER JOIN sale_customer s on p.userid = s.userid where s.salesId = #{salesId,jdbcType=VARCHAR} 
+			)us 
+			left JOIN client_order c  on us.userid = c.userid  
+		)sd where 1 = 1 
+			<if test="info != null and info != ''">
+				and
+				sd.userid like
+				CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+				or sd.company_name like
+				CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+			</if>
+			group by sd.userid
+	)sq		
+	</select>
+	
+	
+<!-- 查询用户分页显示 (管理员查询)-->
+	<select id="queryUserListAdmin" resultMap="UserMap">
+	
+<!--     select p.* from  -->
+<!--     (select u.*,f.factory_id from user u inner JOIN factory_user_relation f on u.userid = f.userid)p where factory_id = #{factoryId,jdbcType=VARCHAR}  -->
+	
+<!-- 	and EXISTS(select permission from back_user where backuserId = #{salesId,jdbcType=VARCHAR} and permission=1) -->
+<!-- 		<if test="info != null and info != ''"> -->
+<!-- 			and -->
+<!-- 			userid like -->
+<!-- 			CONCAT('%',#{info,jdbcType=VARCHAR},'%') -->
+<!-- 			or company_name like -->
+<!-- 			CONCAT('%',#{info,jdbcType=VARCHAR},'%') -->
+<!-- 		</if> -->
+<!-- 		order by id -->
+<!-- 		limit #{start},#{pageSize} -->
+		
+		
+	  select sd.*,min(time) as min_time,max(time) as max_time from 
+		(
+		select us.*,c.create_time as time from 
+		(
+		select u.*,f.factory_id from user u inner JOIN factory_user_relation f on u.userid = f.userid
+		)
+		us left JOIN client_order c  on us.userid = c.userid 
+		)sd  
+        where 1=1 
+		<if test="info != null and info != ''">
+			and
+			userid like
+			CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+			or company_name like
+			CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+		</if>  
+		group by userid order by sd.id
+		limit #{start},#{pageSize}
+	</select>
+
+	<!-- 查询用户总数  (管理员查询)-->
+	<select id="queryUserTotalAdmin" resultType="java.lang.Integer">
+<!--     select count(*) from  -->
+<!--     (select u.*,f.factory_id from user u inner JOIN factory_user_relation f on u.userid = f.userid)p where factory_id = #{factoryId,jdbcType=VARCHAR}  -->
+<!-- 	and EXISTS(select permission from back_user where backuserId = #{salesId,jdbcType=VARCHAR} and permission=1) -->
+<!-- 		<if test="info != null and info != ''"> -->
+<!-- 			and -->
+<!-- 			userid like -->
+<!-- 			CONCAT('%',#{info,jdbcType=VARCHAR},'%') -->
+<!-- 			or company_name like -->
+<!-- 			CONCAT('%',#{info,jdbcType=VARCHAR},'%') -->
+<!-- 		</if> -->
+  select count(*) from 
+   (
+	select sd.*,min(time) as min_time,max(time) as max_time from 
+		(
+		select us.*,c.create_time as time from 
+		(
+		select u.*,f.factory_id from user u inner JOIN factory_user_relation f on u.userid = f.userid
+		)
+		us left JOIN client_order c  on us.userid = c.userid 
+		)sd where 1= 1 
+		<if test="info != null and info != ''">
+			and
+			sd.userid like
+			CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+			or sd.company_name like
+			CONCAT('%',#{info,jdbcType=VARCHAR},'%')
+    	</if>
+    	group by sd.userid  
+	)sq	
+	</select>
+
+
+<!-- 根据userid查询客户数据 -->	
+	<select id="queryByUserId" resultMap="UserMap" parameterType="string">
+	     select  
+	     <include refid="UserColumnList" /> 
+	     from user 
+	     where userid = #{userid,jdbcType=VARCHAR}
+	
+	</select>
+	
+	
+	<!-- 根据id查询客户数据 -->	
+	<select id="queryById" resultMap="UserMap" parameterType="int">
+	     select  
+	     <include refid="UserColumnList" /> 
+	     from user 
+	     where id = #{id,jdbcType=INTEGER}
+	
+	</select>
+	
+	<!-- 根据登录邮箱查询客户数据 -->	
+	<select id="queryByLoginMail" resultMap="UserMap" parameterType="string">
+	     select  
+	     <include refid="UserColumnList" /> 
+	     from user 
+	     where login_email = #{loginEmail,jdbcType=VARCHAR}
+	
+	</select>
+	
+	<!--更新客户信息  -->
+	<update id="updateCustomer" parameterType="com.cbt.entity.User">
+	    update user 
+		<set> 
+	    <if test="email1 != null">
+			email1 = #{email1,jdbcType=VARCHAR},
+		</if>
+	    <if test="loginEmail != null">
+			login_email = #{loginEmail,jdbcType=VARCHAR},
+		</if>
+	    <if test="pwd != null">
+			pwd = #{pwd,jdbcType=VARCHAR},
+		</if>
+	    <if test="updateTime != null">
+			update_time = #{updateTime,jdbcType=TIMESTAMP},
+		</if>
+	    <if test="token != null">
+			token = #{token,jdbcType=VARCHAR},
+		</if>
+	    <if test="tempUser != null">
+			temp_user = #{tempUser,jdbcType=INTEGER},
+		</if>
+	    <if test="encryptedEmail != null"> 
+			encrypted_email = #{encryptedEmail,jdbcType=INTEGER},
+		</if>
+
+	    </set>
+		    where id = #{id,jdbcType=INTEGER}	    
+	</update>
+
+</mapper>

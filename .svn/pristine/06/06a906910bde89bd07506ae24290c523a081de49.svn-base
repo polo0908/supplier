@@ -1,0 +1,356 @@
+package com.cbt.print;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.util.List;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
+import org.apache.poi.hssf.usermodel.HSSFPatriarch;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFSimpleShape;
+import org.apache.poi.hssf.usermodel.HSSFTextbox;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.util.IOUtils;
+
+import com.cbt.entity.QuotationBean;
+import com.cbt.entity.QuotationProcessInfo;
+import com.cbt.entity.QuotationProductionBean;
+import com.cbt.entity.QuotationProductionPriceBean;
+import com.cbt.util.DateFormat;
+import com.cbt.util.OperationFileUtil;
+import com.cbt.util.PicturePdfUtil;
+import com.cbt.util.UploadAndDownloadPathUtil;
+import com.artofsolving.jodconverter.DocumentConverter;  
+import com.artofsolving.jodconverter.openoffice.connection.OpenOfficeConnection;  
+import com.artofsolving.jodconverter.openoffice.connection.SocketOpenOfficeConnection;  
+import com.artofsolving.jodconverter.openoffice.converter.OpenOfficeDocumentConverter;  
+
+
+
+/**
+ * @Description: 根据模板文件打印，输出报价模板
+ * @Author:	polo
+ * @CreateDate:	2017/12/28
+ */
+
+public class QuotationRotatePrintTemplate {
+	
+    
+    
+	private static File tempPath;	
+
+	
+	/**
+	 * pdf打印,使用excel编辑，生成pdf
+	 * @param path
+	 * @throws Exception
+	 */
+	public static String printExcel(HttpServletRequest request,String path,QuotationBean quotationBean,List<QuotationProductionBean> list) throws Exception{
+		
+		int tl = 0;
+        if(list.size() != 0){
+        	for (QuotationProductionBean quotationProductionBean : list) {
+        		List<QuotationProductionPriceBean> priceBeanLists = quotationProductionBean.getQuotationProductionPriceBeanList();
+        		int pr_tl = priceBeanLists.size();
+        		tl +=pr_tl;
+			}
+        }
+        
+        String currency = quotationBean.getCurrency();
+        if("USD".equals(currency)){
+        	currency = "$";
+        }else if("CNY".equals(currency)){
+        	currency = "¥";
+        }else if("EUR".equals(currency)){
+        	currency = "€";
+        }else if("GBP".equals(currency)){
+        	currency = "£";
+        }     
+        
+		/*
+		 * 打开模板，复制sheet，另存
+		 */
+       File file = new File(path+"pdf"+File.separator+"quotation_rotate.xls");
+	
+			
+		FileInputStream fi = new FileInputStream(file);
+		HSSFWorkbook wb = new HSSFWorkbook(fi);
+			wb.cloneSheet(0);						            //复制工作簿
+			wb.setSheetName(1, "quotation for product");		//设置工作簿名称
+		
+			//设置相同内容
+			int rowNo = 0;
+			int colNo = 0;
+			Row nRow = null;
+			Cell nCell = null;
+			
+			HSSFSheet sheet = wb.getSheetAt(1);						//定位到当前工作表
+			sheet.setForceFormulaRecalculation(true);				//强制公式自动计算，利用模板时，模板中的公式不会因值发生变化而自动计算。
+			
+			nRow = sheet.getRow(rowNo);
+			nCell = nRow.getCell(3);
+//			sheet.addMergedRegion(new CellRangeAddress(0, 2,(short)3,(short)5));
+			nCell.setCellValue("Quotaion:"+quotationBean.getProjectId());
+
+			rowNo++;
+			nRow = sheet.getRow(rowNo++);
+			nCell = nRow.getCell(7);
+			nCell.setCellValue("Contact:"+quotationBean.getSaleName());
+						
+			nRow = sheet.getRow(rowNo++);
+			nCell = nRow.getCell(7);
+			nCell.setCellValue(quotationBean.getQuoterEmail());
+			nRow = sheet.getRow(rowNo++);
+			nCell = nRow.getCell(7);
+			nCell.setCellValue("TEL:"+quotationBean.getQuoterTel());
+
+			nRow = sheet.getRow(rowNo++);
+			nCell = nRow.getCell(1);
+			nCell.setCellValue(quotationBean.getCustomerName());
+			nCell = nRow.getCell(5);
+			nCell.setCellValue(quotationBean.getQuotationDate());
+			nCell = nRow.getCell(7);
+			nCell.setCellValue("valid for" +quotationBean.getQuotationValidity()+ "days");
+			
+			rowNo = 7;
+			//当只有一个产品时，处理列表显示
+			if(tl == 1){
+				nRow = sheet.getRow(rowNo++);	
+				nCell = nRow.getCell(0);
+				nCell.setCellValue(list.get(0).getProductName());
+				nCell = nRow.getCell(1);
+				nCell.setCellValue(list.get(0).getProductNotes());
+				List<QuotationProcessInfo> processes = list.get(0).getProcessInfos();
+				if(processes != null && processes.size() != 0){
+					nCell = nRow.getCell(2);	
+					String processList = "";
+					for (int i = 0;i < processes.size(); i++) {						
+						if(i==0){
+							//自动换行
+//							HSSFCellStyle cellStyle=wb.createCellStyle();       
+//							cellStyle.setWrapText(true);       
+//							nCell.setCellStyle(cellStyle);  
+							processList = processes.get(i).getProcessName();							
+						}else{
+							processList +=","+processes.get(i).getProcessName();
+						}
+					}
+					nCell.setCellValue(processList);
+				}
+				
+				nCell = nRow.getCell(4);
+				nCell.setCellValue(list.get(0).getQuotationProductionPriceBeanList().get(0).getMaterialWeight());
+				nCell = nRow.getCell(5);
+				nCell.setCellValue(currency+list.get(0).getMoldPrice());
+				nCell = nRow.getCell(6);
+				nCell.setCellValue(list.get(0).getQuotationProductionPriceBeanList().get(0).getQuantity().toString());
+				nCell = nRow.getCell(7);
+				nCell.setCellValue(currency+list.get(0).getQuotationProductionPriceBeanList().get(0).getProductPrice());
+				
+			}else{
+				for(int k=0;k<tl-1;k++){
+				QuotationNormalPrintTemplate.insertRow(wb, sheet, 7, 1);
+				}
+				int rowNo1 = 7;
+				int production_tl = list.size();
+				for (int i = 0;i < production_tl; i++) {	
+					int price_tl = 0;
+					nRow = sheet.getRow(rowNo);
+					price_tl = list.get(i).getQuotationProductionPriceBeanList().size();
+
+					nCell = nRow.getCell(0);
+					nCell.setCellValue(list.get(i).getProductName());
+					sheet.addMergedRegion(new CellRangeAddress(rowNo, rowNo+price_tl-1,(short)0,(short)0));
+					nCell = nRow.getCell(1);
+					nCell.setCellValue(list.get(i).getProductNotes());
+					sheet.addMergedRegion(new CellRangeAddress(rowNo, rowNo+price_tl-1,(short)1,(short)1));
+					
+					List<QuotationProcessInfo> processes = list.get(i).getProcessInfos();
+					if(processes != null && processes.size() != 0){
+						nCell = nRow.getCell(2);	
+						String processList = "";
+						for (int j = 0;j < processes.size(); j++) {						
+							if(i==0){
+								processList = processes.get(j).getProcessName();							
+							}else{
+								processList +=","+processes.get(j).getProcessName();
+							}
+						}
+						nCell.setCellValue(processList);
+					}
+					
+					nCell = nRow.getCell(4);
+					nCell.setCellValue(list.get(i).getQuotationProductionPriceBeanList().get(0).getMaterialWeight());
+					sheet.addMergedRegion(new CellRangeAddress(rowNo, rowNo+price_tl-1,(short)2,(short)2));
+					nCell = nRow.getCell(5);
+					nCell.setCellValue(currency+list.get(i).getMoldPrice());
+					sheet.addMergedRegion(new CellRangeAddress(rowNo, rowNo+price_tl-1,(short)3,(short)3));
+					rowNo = rowNo + price_tl;
+					for(int j = 0;j < price_tl; j++){					
+						nRow = sheet.getRow(rowNo1+j);
+						nCell = nRow.getCell(6);
+						nCell.setCellValue(list.get(i).getQuotationProductionPriceBeanList().get(j).getQuantity().toString());
+						
+						nCell = nRow.getCell(7);
+						nCell.setCellValue(currency+list.get(i).getQuotationProductionPriceBeanList().get(j).getProductPrice());
+											
+					}
+					rowNo1 = rowNo1 + price_tl;
+				}
+							
+			}
+			
+			            // default
+//						//声明一个画图的顶级管理器
+//				        HSSFPatriarch patriarch = sheet.createDrawingPatriarch();
+//				        /**
+//						 * dx1：起始单元格的x偏移量，如例子中的255表示直线起始位置距A1单元格左侧的距离；
+//						 * dy1：起始单元格的y偏移量，如例子中的125表示直线起始位置距A1单元格上侧的距离；
+//						 * dx2：终止单元格的x偏移量，如例子中的1023表示直线起始位置距C3单元格左侧的距离；
+//						 * dy2：终止单元格的y偏移量，如例子中的150表示直线起始位置距C3单元格上侧的距离；
+//						 * colFrom：起始单元格列序号，从0开始计算；
+//						 * rowFrom：起始单元格行序号，从0开始计算，如例子中col1=0,row1=0就表示起始单元格为A1；
+//						 * colTo：终止单元格列序号，从0开始计算；
+//						 * rowTo：终止单元格行序号，从0开始计算，如例子中col2=2,row2=2就表示起始单元格为C3；
+//						 */
+//						
+//						int dx1 = 50, dy1 = 0, dx2 = 0, dy2 = 0;
+//						int colFrom = 0, rowFrom = 11+tl, colTo = 9, rowTo = 16+tl;
+//			
+//						//新建text文本框
+//						HSSFClientAnchor bigValueAnchorTextBox = new HSSFClientAnchor(dx1, dy1, dx2, dy2, (short)(colFrom), rowFrom+1, (short)(colTo-1), rowTo);
+//						HSSFTextbox bigValueTextbox = patriarch.createTextbox(bigValueAnchorTextBox);
+//						
+//						bigValueTextbox.setString(new HSSFRichTextString(quotationBean.getRemark()));
+//						bigValueTextbox.setLineStyle(HSSFSimpleShape.LINESTYLE_SOLID);	
+//						
+//			
+//                        rowNo = 8+tl;         
+//
+//    
+//					    
+//					    String imgNames = quotationBean.getImgNames();
+//					    int img_tl = 0;
+//					    String[] split = imgNames.split(",");
+//					    if(!(imgNames == null || "".equals(imgNames))){
+//						    img_tl = split.length;
+//					    }
+//
+//					    
+//					    dx1 = 255; dy1 = 125; dx2 = 200; dy2 = 150;
+//					    //图片4个一行存取，最多8张图片，大于8张取前8张
+//                        if(img_tl > 0 && img_tl <= 4){
+//                        for (int i = 0; i < img_tl; i++) {	    			        
+// 					    String pic_path = "";
+//                        pic_path = UploadAndDownloadPathUtil.getRemakPicturePath() + quotationBean.getFactoryId() +File.separator+ OperationFileUtil.changeZipName(split[i]);	
+//					    rowFrom	= 17+tl;
+//					    rowTo = 24+tl;		    
+//					    if(i == 0){
+//					    	colFrom = 0;
+//						    colTo = 2;
+//					    }else if(i == 1){
+//					    	colFrom = 2;
+//						    colTo = 3;
+//					    }else if(i == 2){
+//					    	colFrom = 3;
+//						    colTo = 5;
+//					    }else if(i == 3){
+//					    	colFrom = 5;
+//						    colTo = 7;
+//					    }
+//					    setPicture1(pic_path, sheet,  rowFrom+1, colFrom, rowTo, colTo);
+//                       }	
+//				    }else if(img_tl > 4 && img_tl <= 8){
+//				    	for (int i = 0; i < img_tl; i++) {	
+//	 					    String pic_path = "";
+//	                        pic_path = UploadAndDownloadPathUtil.getRemakPicturePath() + quotationBean.getFactoryId() +File.separator+ split[i];
+//					       
+//					        if(i<4){
+//							    rowFrom	= 17+tl;
+//							    rowTo = 24+tl;	
+//					        }else{
+//							    rowFrom	= 24+tl;
+//							    rowTo = 31+tl;	
+//					        }
+//	    
+//						    if(i == 0 || i == 4){
+//						    	colFrom = 0;
+//							    colTo = 2;
+//						    }else if(i == 1 || i == 5){
+//						    	colFrom = 2;
+//							    colTo = 3;
+//						    }else if(i == 2 || i == 6){
+//						    	colFrom = 3;
+//							    colTo = 5;
+//						    }else if(i == 3 || i == 7){
+//						    	colFrom = 5;
+//							    colTo = 7;
+//						    }
+//						    setPicture1(pic_path, sheet,  rowFrom+1, colFrom, rowTo, colTo);
+//				    	}	
+//				    }
+					    
+					    
+					    
+					    
+			
+		String paths = UploadAndDownloadPathUtil.getQuotationPath() + quotationBean.getFactoryId();	
+		
+		tempPath= new File(paths);
+//		deleteFile(tempPath);
+		 if(!tempPath.exists() || !tempPath.isDirectory())
+	        {
+	            tempPath.mkdir();  //如果不存在，则创建该文件夹
+	        }
+		 wb.removeSheetAt(0);	   //删除模板sheet
+		FileOutputStream fs = new FileOutputStream(paths + File.separator + quotationBean.getProjectId() + "-" + DateFormat.currentDate().replace("-", ".") + ".xls", false);
+		wb.write(fs);
+		fs.close();
+		 PicturePdfUtil.office2PDF(paths + File.separator + quotationBean.getProjectId() + "-" + DateFormat.currentDate().replace("-", ".") + ".xls", 
+				 paths + File.separator + quotationBean.getProjectId()+ "-"+DateFormat.currentDate().replace("-", ".") + ".pdf");
+
+		return paths + File.separator + quotationBean.getProjectId() + "-" + DateFormat.currentDate().replace("-", ".") + ".pdf";
+
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+			
+		    
+		    public static void main(String []args) throws Exception {    
+		          
+		        String sourcePath = "G:\\apache-tomcat-7.0.57\\wtpwebapps\\quotation\\f1010\\quotation_rotate.xls";   
+		        String destFile = "e:\\12202211.pdf";   
+		        int flag = QuotationNormalPrintTemplate.office2PDF(sourcePath, destFile);   
+		        if (flag == 1) {  
+		            System.out.println("转化失败");  
+		        }else if(flag == 0){  
+		            System.out.println("转化成功");  
+		        }else {  
+		            System.out.println("找不到源文件, 或url.properties配置错误");            
+		        }  
+		    }      
+		
+		
+		
+}

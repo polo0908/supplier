@@ -1,0 +1,62 @@
+.recent-posts li, .recent-comments li, .article-post li, .recent-users li{border-bottom: none;}
+.article-post .w-content{
+  max-height: 400px;
+  border: 1px solid #eee;
+  border-top: none;
+}
+.w-content p {
+  padding: 13px;
+  font-size: 12px;
+}
+.w-content .bg-fff {
+  background: #fff;
+}
+.user-info{font-size: 14px;}
+.w-user-info {
+  color: #bcbcbc;
+  font-size: 14px;
+}
+.w-user-info{font-size: 14px;color: #bcbcbc;}
+
+.z-reply{margin-left: 60%;color: #08c;}
+
+
+.chat-messages-inner .msg-block{
+  background: none repeat scroll 0 0 #FFFFFF;
+  border: 1px solid #cccccc;
+  box-shadow: 1px 1px 0 1px rgba(0, 0, 0, 0.05);
+  display: block;
+  margin-left: 0px;
+  padding: 10px;
+  position: relative;
+}
+.w-user-info{    color: #666666;
+  font-size: 11px;}
+.w-text-div{margin: 10px 0 0 0;}
+.w-text-div2{margin: 10px 0 0 0;}
+.w-text-div2 .w-bg{
+  background: none repeat scroll 0 0 #f2dede;
+  color: #b94a48;
+  border: 1px solid #eed3d7;
+  box-shadow: 1px 1px 0 1px rgba(0, 0, 0, 0.05);
+  display: block;
+  margin-left: 0px;
+  padding: 10px;
+  position: relative;}
+.w-text-div2 .w-bg .w-user-info,.w-text-div2 .w-bg .w-user-p a{ color: #b94a48;}
+.w-text-div2 .w-bg .w-user-p{margin: 0 0 10px;}
+.chat-message{margin: 20px 0 10px;}
+.collapse{width: 100%;}
+.widget-title .w-widget-p{
+ float:right;
+}
+.widget-title p {
+  color: #666;
+  float: left;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 12px;
+  line-height: 12px;
+  margin: 0;
+}
+.widget-title .label{float: left;}

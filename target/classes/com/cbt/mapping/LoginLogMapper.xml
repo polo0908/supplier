@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.LoginLogDao">
+
+
+	<resultMap id="LoginLogMap" type="com.cbt.entity.LoginLog">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="login_email" property="loginEmail" jdbcType="VARCHAR" />
+		<result column="username" property="username" jdbcType="VARCHAR" />
+		<result column="login_time" property="loginTime" jdbcType="TIMESTAMP" />
+		<result column="login_fail_time" property="loginFailTime" jdbcType="TIMESTAMP" />
+		<result column="login_ip" property="loginIp" jdbcType="VARCHAR" />
+		<result column="login_status" property="loginStatus" jdbcType="INTEGER" />
+        <result column="error_info" property="errorInfo" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="LoginLogColumnList">
+		id, login_email, username, 
+		login_time, login_fail_time, login_ip, login_status,error_info
+	</sql>
+	
+	
+	<!-- 查询最近登录100用户 -->    
+    <select id="querySuccessTop" resultMap="LoginLogMap">
+        select 
+        <include refid="LoginLogColumnList"/>
+        from login_log where login_status = 0 order by login_time desc  limit 0,100
+    </select>
+	<!-- 查询最近登录失败100用户 -->    
+    <select id="queryFailTop" resultMap="LoginLogMap">
+        select 
+        <include refid="LoginLogColumnList"/>
+        from login_log where login_status = 1  order by login_fail_time desc limit 0,100   
+    </select>
+    
+    <!-- 查询登录成功人数 -->
+    <select id="queryTotal1" resultType="int">
+        select count(*) from 
+        (select 
+        <include refid="LoginLogColumnList"/>
+        from login_log where login_status = 0 limit 0,100) d
+    </select>
+    <!-- 查询登录失败人数 -->
+    <select id="queryTotal2" resultType="int">
+        select count(*) from  
+        (select 
+        <include refid="LoginLogColumnList"/>
+        from login_log where login_status = 1 limit 0,100) d
+    </select>
+    
+
+</mapper>

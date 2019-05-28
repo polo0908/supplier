@@ -1,0 +1,96 @@
+package com.cbt.service.impl;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.cbt.dao.UserDao;
+import com.cbt.dao.UserRelationEmailDao;
+import com.cbt.entity.User;
+import com.cbt.entity.UserRelationEmail;
+import com.cbt.service.UserRelationEmailService;
+import com.cbt.util.DateFormat;
+
+
+
+@Service
+public class UserRelationEmailServiceImpl implements UserRelationEmailService {
+    
+	@Resource
+	private UserRelationEmailDao userRelationEmailDao;
+	@Resource
+	private UserDao userDao;
+	
+	@Override
+	public UserRelationEmail queryUseridByEmail(String email) {
+		return userRelationEmailDao.queryUseridByEmail(email);
+	}
+
+	
+	
+	/*
+	 * @author polo
+     * 2017年5月3日
+	 * 插入客户关联子邮箱
+	 */
+	@Transactional
+	@Override
+	public List<UserRelationEmail> insert(String userid,String email)throws Exception {
+       User user = new User();
+       UserRelationEmail userRelationEmail = new UserRelationEmail();
+       
+       //判断当前邮箱是否已关联
+      if(!(userRelationEmailDao.queryUseridByEmail(email) == null || "".equals(userRelationEmailDao.queryUseridByEmail(email)))){
+    	  throw new Exception("Email已经存在");
+      }
+       if(userid == null || "".equals(userid)){
+    	   throw new Exception("userid不能为空");
+       }      
+       if(email == null || "".equals(email)){
+    	   throw new Exception("邮箱不能为空");
+       }else{
+    	   user.setEmail(email);
+    	   user.setCreateTime(DateFormat.format());
+    	   user.setLoginEmail(email);
+    	   user.setUpdateTime(DateFormat.format());
+    	   user.setPwd("123456");
+    	   
+    	   userRelationEmail.setEmail(email);
+    	   userRelationEmail.setUserid(userid);
+    	   userRelationEmail.setPwd("123456");
+    	   userRelationEmail.setCreateTime(DateFormat.format());    	   
+    	   userRelationEmailDao.insert(userRelationEmail);
+    	   userDao.insertUserByAdmin(user);    
+    	   
+       }
+       return userRelationEmailDao.queryByUserId(userid);
+       
+	}
+
+
+     /*
+      * @author polo
+      * 2017年5月3日
+      * 根据ID查询子邮箱
+      */
+	@Override
+	public List<UserRelationEmail> queryByUserId(String userid) throws Exception {
+		
+		if(userid == null || "".equals(userid)){
+			throw new Exception("未获取到用户ID");
+		}		
+		return userRelationEmailDao.queryByUserId(userid);
+	}
+
+
+
+	@Override
+	public void insertUserRelationEmail(List<Object> list) {
+		userRelationEmailDao.insertUserRelationEmail(list);
+		
+	}
+
+}

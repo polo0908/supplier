@@ -1,0 +1,101 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+	pageEncoding="utf-8"%>
+<%@page import="com.cbt.util.WebCookie"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%> 
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>ImportX</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link type='image/x-ico' rel='icon' href='img/favicon.ico' />
+<link rel="stylesheet" href="css/bootstrap.min.css" />
+<link rel="stylesheet" href="css/bootstrap-responsive.min.css" />
+<link rel="stylesheet" href="css/matrix-style.css" />
+<link rel="stylesheet" href="css/matrix-media.css" />
+<link href="font-awesome/css/font-awesome.css" rel="stylesheet" />
+<link rel="stylesheet" href="css/easydialog.css" />
+
+<script type="text/javascript" src="/supplier/js/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="js/easydialog.min.js"></script>
+<script type="text/javascript" src="js/base64.js"></script> 
+<script type="text/javascript">
+$(function(){
+		$('#sidebar').find('li').eq(2).addClass('active');
+		
+})
+
+    //预览下载报价单
+	function view_quotation(quotationInfoId){
+		//使用ajax提交下载
+		$.ajax({
+			url:"/supplier/fileDownload_quotation.do",
+			data:{
+				  "quotationInfoId":quotationInfoId
+				  },
+			type:"post",
+			dataType:"text",
+			success:function(res){			
+				window.location.href = "/supplier/fileDownload_quotation.do?quotationInfoId="+quotationInfoId;				
+				},
+		    error:function(){
+		    	
+		    	easyDialog.open({
+		    		  container : {
+		    		    header : 'Prompt message',
+		    		    content : '下载失败'
+		    		  },
+		    		  overlay : false,
+		    		  autoClose : 1000
+		    		});
+		    }
+		});
+	}
+	
+	
+//通过NBmail发送报价单
+// function send_quotation_email(userId,quotationId){
+// 	top.location.href = "http://192.168.1.62:8080/NBEmail/helpServlet?action=sendQuotation&className=ExternalInterfaceServlet&eid="+userId+"&quotationId="+quotationId;
+// }
+	
+	
+	
+
+</script>
+</head>
+<body>
+<jsp:include page="base.jsp"></jsp:include>
+<div id="content">
+  <div id="content-header">
+    <div id="breadcrumb"> <a href="#"  class="tip-bottom"><i class="icon icon-user"></i>报价单</a><a href="#">查询报价</a>
+        <a href="#" class="current">发送报价单</a>
+    </div>
+<h1 style="font-size: 26px;">发送报价单</h1>
+  </div>
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span12">
+                <div class="widget-box">
+                    <div class="widget-content">
+                        <div class="error_ex">
+                            <a href="#" style="text-decoration: underline;font-size: 15px;font-weight: 600;" onclick="view_quotation('${quotationId}')"><p>将报告另存为PDF</p></a>
+                            <a style="text-decoration: underline;font-size: 16px;font-weight: 600;color:#5571dc;" href="http://112.64.174.34:43887/NBEmail/helpServlet?action=sendQuotation&className=ExternalInterfaceServlet&eid=${userId}&projectId=${projectId}&content=${quotationAttr}" target="_blank"><p>通过电子邮件发送给客户</p></a>
+                            <a style="text-decoration: underline;font-size: 15px;font-weight: 600;" href="/supplier/queryAllQuotation.do">返回报价单列表</a> </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row-fluid">
+  <div id="footer" class="span12">
+    </div>
+</div>
+</body>
+</html>
+
+

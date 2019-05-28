@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.FactoryUserRelationDao">
+
+	<resultMap id="FactoryUserRelationResultMap" type="com.cbt.entity.FactoryUserRelation">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="factory_id" property="factoryId" jdbcType="VARCHAR" />
+		<result column="userid" property="userid" jdbcType="VARCHAR" />
+		<result column="factory_user_remark" property="factoryUserRemark" jdbcType="VARCHAR" />
+	</resultMap> 
+   
+   <sql id="FactoryUserRelationColumnList">
+       id,factory_id,userid,factory_user_remark 
+   </sql>
+	<!-- 根据工厂ID查询工厂对应客户信息 -->
+    <select id="queryByFactoryId" resultMap="FactoryUserRelationResultMap" parameterType="string">
+          select <include refid="FactoryUserRelationColumnList"/>
+          from factory_user_relation
+          where factory_id = #{factoryId,jdbcType=VARCHAR} 
+    </select>
+
+        <!-- 根据用户ID查询客户对应工厂信息-->
+     <select id="queryByUserid" resultMap="FactoryUserRelationResultMap" parameterType="string">
+          select <include refid="FactoryUserRelationColumnList"/>
+          from factory_user_relation 
+          where userid = #{userid,jdbcType=VARCHAR} 
+    </select>
+    
+        <!-- 根据用户ID查询客户对应工厂信息-->
+     <select id="queryByFactoryIdAndUserid" resultMap="FactoryUserRelationResultMap">
+          select <include refid="FactoryUserRelationColumnList"/>
+          from factory_user_relation 
+          where userid = #{userid,jdbcType=VARCHAR} and factory_id = #{factoryId,jdbcType=VARCHAR} 
+    </select>
+    
+    <!-- 根据客户名查询工厂数 -->
+    <select id="totalFactory" parameterType="string" resultType="int">
+          select count(*) from factory_user_relation where userid = #{userid,jdbcType=VARCHAR}     
+    </select>
+    
+    <select id="queryCount" resultType="int">
+          select count(*) from factory_user_relation where userid = #{userid,jdbcType=VARCHAR} 
+          and 
+          factory_id = #{factoryId,jdbcType=VARCHAR} 
+    </select>
+    
+
+      <!-- 写入工厂对应客户关系表 -->
+    <insert id="insert">
+      insert into factory_user_relation
+       (
+       factory_id,userid
+       )
+       values
+       (
+       #{factoryId,jdbcType=VARCHAR},
+       #{userid,jdbcType=VARCHAR}
+       )      
+    </insert>
+    
+    <update id="updateRemark" parameterType="com.cbt.entity.FactoryUserRelation">
+        update factory_user_relation 
+		<set> 
+		    <if test="factoryUserRemark != null">
+				factory_user_remark = #{factoryUserRemark,jdbcType=VARCHAR},
+			</if>
+	    </set>
+		    where id = #{id,jdbcType=INTEGER}	  
+    
+    </update>
+    
+    
+        <!--   批量插入数据 -->
+	<insert id="insertBatch" parameterType="java.util.List">
+	insert into factory_user_relation 
+		    (    
+            factory_id,userid
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.factoryId}, 
+            #{item.userid}
+	      )
+	    </foreach>
+	</insert>
+    
+    	
+</mapper>

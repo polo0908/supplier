@@ -1,0 +1,56 @@
+package com.cbt.enums;
+/**
+ * 选择pdf模板问题
+ * @author polo
+ *
+ */
+public enum QuotePdfTypeEnum {
+
+	NORMAL(0,"normal"),
+
+	ROTATE(1,"rotate"),
+
+	UPTAKE(2,"uptake"),
+
+	PRESS(3,"press"),
+		
+	ALUMINUM(4,"aluminum"),
+	
+	FORGE(5,"forge"),
+	
+	LASER(6,"laser"),
+	
+	MACHINING(7,"machining");
+
+
+	private int code;
+	public int getCode() {
+		return code;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	private String value;
+	
+	QuotePdfTypeEnum(int code, String value){
+		this.code = code;
+		this.value = value;
+	}
+	
+	public static QuotePdfTypeEnum getEnum(int code) {
+		for(QuotePdfTypeEnum sourceEnum:  QuotePdfTypeEnum.values()) {
+	    	if(sourceEnum.getCode() == code) return sourceEnum;
+	    }
+		return null;
+	}
+	
+	
+	public static QuotePdfTypeEnum getGen(String gen) {
+		for(QuotePdfTypeEnum sourceEnum :  QuotePdfTypeEnum.values()) {
+			if(gen.equals(sourceEnum.getValue())) return sourceEnum;
+		}
+		return null;
+	}
+}

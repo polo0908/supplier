@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.ShippingInfoDao">
+
+	<resultMap id="ShippingInfoMap" type="com.cbt.entity.ShippingInfo">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="userid" property="userid" jdbcType="VARCHAR" />
+		<result column="cid" property="cid" jdbcType="INTEGER" />
+		<result column="username" property="userName" jdbcType="VARCHAR" />
+		<result column="job" property="job" jdbcType="VARCHAR" />
+		<result column="company_name" property="companyName" jdbcType="VARCHAR" />
+        <result column="otherName1" property="otherName1" jdbcType="VARCHAR" />
+        <result column="otherName2" property="otherName2" jdbcType="VARCHAR" />
+        <result column="register_email" property="registerEmail" jdbcType="VARCHAR" />
+        <result column="contact_email" property="contactEmail" jdbcType="VARCHAR" />
+        <result column="telephone1" property="telephone1" jdbcType="VARCHAR" />
+        <result column="telephone2" property="telephone2" jdbcType="VARCHAR" />
+        <result column="mobile_phone1" property="mobilePhone1" jdbcType="VARCHAR" />
+        <result column="mobile_phone2" property="mobilePhone2" jdbcType="VARCHAR" />
+        <result column="fax" property="fax" jdbcType="VARCHAR" />
+        <result column="detailed_address" property="detailedAddress" jdbcType="VARCHAR" />
+        <result column="address1" property="address1" jdbcType="VARCHAR" />
+        <result column="address2" property="address2" jdbcType="VARCHAR" />
+        <result column="country" property="country" jdbcType="VARCHAR" />
+        <result column="state" property="state" jdbcType="VARCHAR" />
+        <result column="city" property="city" jdbcType="VARCHAR" />
+        <result column="postcode" property="postcode" jdbcType="VARCHAR" />
+        <result column="siteUrl" property="siteUrl" jdbcType="VARCHAR" />
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="ShippingInfoColumnList">
+	id, userid, cid, username, job, company_name, otherName1, otherName2, 
+	register_email, contact_email, telephone1, telephone2, mobile_phone1,
+	 mobile_phone2, fax, detailed_address, address1, address2, country, state,
+	 city, postcode, siteUrl, update_time  
+	</sql>
+	    <!-- 批量插入数据 -->
+	<insert id="insertShippingInfo" parameterType="ArrayList">
+	    insert into shipping_info 
+		    (
+		    userid, cid, username, job, company_name, otherName1, otherName2, 
+	        register_email, contact_email, telephone1, telephone2, mobile_phone1,
+	        mobile_phone2, fax, detailed_address, address1, address2, country, state,
+	        city, postcode, siteUrl
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.userid},#{item.cid},#{item.userName},#{item.job},
+		    #{item.companyName},#{item.otherName1},#{item.otherName2},
+		    #{item.registerEmail},#{item.contactEmail}, 
+		    #{item.telephone1},#{item.telephone2},#{item.mobilePhone1},#{item.mobilePhone2}
+		    ,#{item.fax},#{item.detailedAddress},#{item.address1}
+		    ,#{item.address2},#{item.country},#{item.state},#{item.city},#{item.postcode},#{item.siteUrl}
+	      )
+	    </foreach>
+	  </insert>
+	  <!-- 插入数据 -->
+	  <insert id="insertInfo" parameterType="com.cbt.entity.ShippingInfo">
+	     insert into shipping_info 
+		    (
+		    userid, username,
+	        register_email, contact_email, telephone1,
+	        detailed_address,country, state, postcode,
+	        city,update_time
+            )
+	    values
+	        (
+	        #{userid,jdbcType=VARCHAR},
+	        #{userName,jdbcType=VARCHAR},	       
+	        #{registerEmail,jdbcType=VARCHAR},
+	        #{contactEmail,jdbcType=VARCHAR},
+	        #{telephone1,jdbcType=VARCHAR},	      
+	        #{detailedAddress,jdbcType=VARCHAR},
+	        #{country,jdbcType=VARCHAR},
+	        #{state,jdbcType=VARCHAR},
+	        #{postcode,jdbcType=VARCHAR},
+	        #{city,jdbcType=VARCHAR},
+	        #{updateTime,jdbcType=TIMESTAMP}
+	        
+	        )     
+	  
+	  </insert>
+	  
+	      <!-- 根据userId查询 -->
+	<select id="queryByUserId" resultMap="ShippingInfoMap">
+		select 
+        <include refid="ShippingInfoColumnList"/>  
+		from shipping_info
+		where userid = #{userid,jdbcType=VARCHAR} 
+	</select>
+
+    <select id="queryAll" resultMap="ShippingInfoMap">
+        select country from shipping_info
+    </select>
+	
+	<!-- 更新图纸信息 -->
+	<update id="updateShippingInfo"  parameterType="com.cbt.entity.ShippingInfo">
+		update shipping_info 
+		<set> 
+	    <if test="userName != null">
+			username = #{userName,jdbcType=VARCHAR},
+		</if>
+        <if test="job != null">
+			job = #{job,jdbcType=VARCHAR},
+        </if>
+	    <if test="companyName != null">
+			company_name = #{companyName,jdbcType=VARCHAR},
+		</if>
+		<if test="otherName1 != null">
+			otherName1 = #{otherName1,jdbcType=VARCHAR},
+        </if>
+        <if test="otherName2 != null">
+			otherName2 = #{otherName2,jdbcType=VARCHAR},
+        </if>
+	    <if test="registerEmail != null">
+			register_email = #{registerEmail,jdbcType=VARCHAR},
+		</if>
+		<if test="contactEmail != null">
+			contact_email = #{contactEmail,jdbcType=VARCHAR},
+        </if>
+        <if test="telephone1 != null">
+			telephone1 = #{telephone1,jdbcType=VARCHAR},
+        </if>
+        <if test="telephone2 != null">
+			telephone2 = #{telephone2,jdbcType=VARCHAR},
+        </if>
+        <if test="mobilePhone1 != null">
+			mobile_phone1 = #{mobilePhone1,jdbcType=VARCHAR},
+        </if>
+        <if test="mobilePhone2 != null">
+			mobile_phone2 = #{mobilePhone2,jdbcType=VARCHAR},
+        </if>
+	    <if test="fax != null">
+			fax = #{fax,jdbcType=VARCHAR},
+		</if>
+		<if test="detailedAddress != null">
+			detailed_address = #{detailedAddress,jdbcType=VARCHAR},
+        </if>
+        <if test="address1 != null">
+			address1 = #{address1,jdbcType=VARCHAR},
+        </if>
+        <if test="address2 != null">
+			address2 = #{address2,jdbcType=VARCHAR},
+	    </if>
+	    <if test="country != null">
+			country = #{country,jdbcType=VARCHAR},
+		</if>
+	    <if test="state != null">
+			state = #{state,jdbcType=VARCHAR},
+		</if>
+	    <if test="city != null">
+			city = #{city,jdbcType=VARCHAR},
+		</if>
+		
+	    <if test="postcode != null">
+			postcode = #{postcode,jdbcType=VARCHAR},
+		</if>
+		<if test="siteUrl != null">
+			siteUrl = #{siteUrl,jdbcType=VARCHAR},
+        </if>
+	    <if test="updateTime != null">
+			update_time = #{updateTime,jdbcType=TIMESTAMP},
+		</if>
+	    </set>
+		 where id = #{id,jdbcType=INTEGER}
+	</update>        
+
+
+</mapper>

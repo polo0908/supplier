@@ -1,0 +1,173 @@
+package com.cbt.service;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.cbt.entity.AmountUnit;
+import com.cbt.entity.QuotationBean;
+import com.cbt.entity.QuotationProcessInfo;
+import com.cbt.entity.QuotationProductionBean;
+import com.cbt.entity.QuotationProductionPriceBean;
+import com.cbt.entity.QuotationRemarkTemplate;
+import com.cbt.entity.SaleCustomer;
+import com.cbt.entity.SaleOrder;
+
+public interface QuotationService {
+    
+	public List<QuotationBean> queryForListAdmin(String user, String beginDate, String endDate, Integer page,String factoryId);
+	
+	public int queryCountForPageAdmin(String user, String beginDate, String endDate,String factoryId);
+
+	public List<QuotationBean> queryForList(String user, String begin,String end, Integer page, String userName,String factoryId);
+
+	public int queryCountForPage(String user, String begin, String end, String userName,String factoryId);
+
+	public List<AmountUnit> queryCurrencyList();
+	
+	
+	
+	/**
+	 * 根据id查询报价单
+	 * @author polo
+	 * 2017年5月26日
+	 *
+	 */
+	public QuotationBean queryById(Integer id);
+	
+	
+	/**
+	 * 根据id更新报价单
+	 * @author polo
+	 * 2017年5月26日
+	 *
+	 */
+	public void updateQuotationAndProduct(HttpServletRequest request,QuotationBean quotationBean,String productList)throws Exception;
+	
+	/**
+	 * 删除报价单
+	 * @author polo
+	 * 2017年5月26日
+	 *
+	 */
+	public void deleteQuotation(Integer id)throws Exception;
+	
+	
+	/**
+	 * 生成备注模板
+	 * @author polo
+	 * 2017年5月24日
+	 *
+	 */
+	public void insertTempRemark(QuotationRemarkTemplate quotationRemarkTemplate);
+	
+	
+	/**
+	 * 更新备注模板
+	 * @author polo
+	 * 2017年5月24日
+	 *
+	 */
+	public void updateTempRemark(QuotationRemarkTemplate quotationRemarkTemplate);
+	
+	/**
+	 * 更新备注模板
+	 * @author polo
+	 * 2017年5月24日
+	 *
+	 */
+	public List<QuotationRemarkTemplate> updateTempRemark(QuotationRemarkTemplate quotationRemarkTemplate,QuotationRemarkTemplate quotationRemarkTemplate1,String factoryId);
+	
+	
+	/**
+	 * 根据id查询
+	 * @author polo
+	 * 2017年5月24日
+	 *
+	 */
+	public QuotationRemarkTemplate queryByRemarkId(Integer RemarkId);
+	
+	
+	/**
+	 * 当点击关闭的时候删除内容
+	 * @author polo
+	 * 2017年5月25日
+	 *
+	 */
+	public void deleteTempRemarkById(Integer RemarkId);
+	
+	
+	/**
+	 * 根据工厂id查询
+	 * @author polo
+	 * 2017年5月25日
+	 *
+	 */
+	public List<QuotationRemarkTemplate> queryTempRemarkByFactoryId(String factoryId);
+	
+    
+	/**
+	 * 插入报价信息
+	 * @author polo
+	 * 2017年5月25日
+	 *
+	 */
+	public void insertQuotation(HttpServletRequest request,QuotationBean quotationBean,String productList)throws Exception;
+	
+	
+	/**
+	 * 插入报价信息(用户同步后台报价单数据)
+	 * @author polo
+	 * 2017年6月20日
+	 *
+	 */
+	public void insertQuotation(QuotationBean quotationBean,QuotationProductionBean productionBean,QuotationProductionPriceBean priceBean,
+			List<SaleCustomer> list2,List<SaleOrder> list3,List<QuotationProcessInfo> processInfos)throws Exception;
+	
+	
+	/**
+	 * 根据项目号查询
+	 * @param projectId
+	 * @return
+	 */
+	public QuotationBean queryByProjectId(String projectId);
+	
+	
+    /**
+     * 更新报价单
+     * @author polo
+     * 2017年5月24日
+     *
+     */
+	public void updateQuotation(QuotationBean quotationBean);	
+	
+	
+	/**
+	 * 查询最大和最小的价格
+	 * @return
+	 */
+	public Map<String, Double> queryMaxMinPrice(@Param("quotationInfoId")Integer quotationInfoId);
+	
+	
+	
+	
+	
+	/**
+	 * 查询remark排序序号
+	 * @return
+	 */
+	public Integer queryMaxRemarkIndex();
+	
+	
+	
+	/**
+	 * 根据id更新报价单
+	 * @author polo
+	 * 2017年9月7日
+	 *
+	 */
+	public void updateQuotation(HttpServletRequest request,QuotationBean quotationBean,String currency)throws Exception;
+}

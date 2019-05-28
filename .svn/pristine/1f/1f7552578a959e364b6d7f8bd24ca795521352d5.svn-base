@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.ProductionPhotoTimelineDao">
+
+	<resultMap id="ProductionPhotoTimelineResultMap" type="com.cbt.entity.ProductionPhotoTimeline">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="order_id" property="orderId" jdbcType="VARCHAR" />
+		<result column="photo_name" property="photoName" jdbcType="VARCHAR" />
+		<result column="upload_date" property="uploadDate" jdbcType="DATE" />
+		<result column="remarks" property="remarks" jdbcType="LONGVARCHAR" />
+		<result column="photo_path" property="photoPath" jdbcType="VARCHAR" />
+		<result column="photo_path_compress" property="photoPathCompress" jdbcType="VARCHAR" />
+	</resultMap> 
+     
+     <sql id="ProductionPhotoTimelineColumnList">
+     id,order_id,photo_name,upload_date,remarks,photo_path,photo_path_compress
+     </sql>
+    
+    <!-- 根据订单id查询图片-->
+    <select id="queryByOrderId" resultMap="ProductionPhotoTimelineResultMap" parameterType="string">
+<!--           select  -->
+<!--           <include refid="ProductionPhotoTimelineColumnList"/> -->
+<!--           from production_photo_timeline -->
+<!--           where order_id = #{orderId,jdbcType=VARCHAR} -->
+<!--           ORDER BY upload_date desc                    -->
+	    select * from production_photo_timeline where EXISTS 
+		   (  
+		    select id from 
+		                (  
+				        SELECT max(id) as id FROM production_photo_timeline where order_id = #{orderId,jdbcType=VARCHAR} 
+				         group by upload_date 
+				         ) t   
+		    where t.id=production_photo_timeline.id  
+		   )  order by upload_date desc
+    </select>
+    
+    
+    <!-- 查询订单各时间点图片-->
+    <select id="queryByOrderIdGroupByDate" resultMap="ProductionPhotoTimelineResultMap">
+<!--           select -->
+<!--           <include refid="ProductionPhotoTimelineColumnList"/>  -->
+<!--           from production_photo_timeline -->
+<!--           where order_id = #{orderId,jdbcType=VARCHAR}    -->
+<!--           GROUP BY upload_date  desc                   -->
+	  select * from production_photo_timeline where EXISTS 
+		   (  
+		    select id from 
+		                (  
+				        SELECT max(id) as id FROM production_photo_timeline where order_id = #{orderId,jdbcType=VARCHAR} 
+				         group by upload_date 
+				         ) t   
+		    where t.id=production_photo_timeline.id  
+		   )  order by upload_date desc
+    </select>
+    
+    
+    <!-- 根据时间查询图片-->
+    <select id="queryByUploadDate" resultMap="ProductionPhotoTimelineResultMap">
+          select  
+          <include refid="ProductionPhotoTimelineColumnList"/>
+          from production_photo_timeline
+          where order_id = #{orderId,jdbcType=VARCHAR}
+          and upload_date = #{uploadDate,jdbcType=DATE} 
+          order by id desc                
+    </select>
+
+	<!-- 批量插入图片 -->
+	<insert id="insert" parameterType="java.util.List">
+	    insert into production_photo_timeline 
+		    (
+		    order_id,photo_name,upload_date,remarks,photo_path,photo_path_compress
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.orderId},#{item.photoName},#{item.uploadDate}, 
+		    #{item.remarks}, 
+		    #{item.photoPath},
+		    #{item.photoPathCompress}
+	      )
+	    </foreach>
+	</insert>
+	
+	<!-- 根据id删除 -->
+	<delete id="delete" parameterType="int">
+	     delete from production_photo_timeline 
+	     where id = #{id,jdbcType=INTEGER}	
+	</delete>
+	
+	
+	
+	
+	    <!-- 批量更新图片备注 -->	
+	<update id="updateRemarkBatch" parameterType="java.util.List">    
+     <foreach collection="list" item="item" index="index"  open="" close="" separator=";">   
+     	    update production_photo_timeline  
+     	    <set>     
+			remarks = #{item.remarks} 
+			</set> 
+			where 
+            order_id = #{item.orderId}  
+            and upload_date = #{item.uploadDate}             
+     </foreach>       
+    </update> 
+	
+</mapper>

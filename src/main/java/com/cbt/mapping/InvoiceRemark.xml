@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.InvoiceRemarkDao">
+
+	<resultMap id="InvoiceRemarkResultMap" type="com.cbt.entity.InvoiceRemark">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="factort_id" property="factortId" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="LONGVARCHAR" />
+		<result column="remark1" property="remark1" jdbcType="LONGVARCHAR" />
+		<result column="remark_bank" property="remarkBank" jdbcType="VARCHAR" />
+		
+		
+		
+	</resultMap> 
+
+	<!-- 根据工厂查询发票备注 -->
+    <select id="queryRemarkByFactoryId" resultMap="InvoiceRemarkResultMap">
+          select id,factory_id,remark,remark1,remark_bank from invoice_remark   
+          where factory_id = #{factoryId,jdbcType=VARCHAR} 
+    </select>
+    
+    
+	<!-- 查询银行付款备注 -->
+    <select id="queryById" resultMap="InvoiceRemarkResultMap">
+          select id,factory_id,remark,remark1,remark_bank from invoice_remark   
+          where id = #{id,jdbcType=INTEGER} 
+    </select>
+
+    <update id="updateRemarkByFactoryId" parameterType="com.cbt.entity.InvoiceRemark">
+          update invoice_remark
+          <set>
+             <if test="remark != null">
+			  remark = #{remark,jdbcType=LONGVARCHAR},
+		     </if>          
+             <if test="remark1 != null">
+			  remark1 = #{remark1,jdbcType=LONGVARCHAR},
+		     </if>          
+          </set>
+          where id = #{id,jdbcType=INTEGER}
+    </update>
+	
+</mapper>

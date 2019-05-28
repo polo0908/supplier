@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.QuotationProductionDao">
+	<resultMap type="com.cbt.entity.QuotationProductionBean" id="quotationProductionResultMap">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="quotationInfoId" column="quotation_info_id" jdbcType="INTEGER"/>
+		<result property="productName" column="product_name" jdbcType="VARCHAR"/>
+		<result property="moldPrice" column="mold_price" jdbcType="DOUBLE"/>
+		<result property="productNotes" column="product_notes" jdbcType="LONGVARCHAR"/>
+		<result property="material" column="material" jdbcType="VARCHAR"/>
+		<result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+		<result property="priceStatus" column="price_status" jdbcType="INTEGER"/>
+		<result property="materialUnitPrice" column="material_unit_price" jdbcType="DOUBLE"/>
+		<result property="materialLoss" column="material_loss" jdbcType="DOUBLE"/>
+		<result property="factoryPrice" column="factory_price" jdbcType="DOUBLE"/>
+		<result property="point" column="point" jdbcType="INTEGER"/>
+		<result property="rejectionRate" column="rejection_rate" jdbcType="DOUBLE"/>
+		<result property="moldProfitRate" column="mold_profit_rate" jdbcType="DOUBLE"/>
+		<result property="moldFactoryPrice" column="mold_factory_price" jdbcType="DOUBLE"/>
+		<result property="processList" column="process_list" jdbcType="DOUBLE"/>
+		
+	</resultMap>
+	
+	<resultMap type="com.cbt.entity.QuotationProductionPriceBean" id="quotationProductionPriceResultMap">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="productionInfoId" column="production_info_id" jdbcType="INTEGER"/>
+		<result property="productName" column="product_name" jdbcType="VARCHAR"/>
+		<result property="productPrice" column="product_price" jdbcType="DOUBLE"/>
+		<result property="quantity" column="quantity" jdbcType="INTEGER"/>
+		<result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+		<result property="totalProfitRate" column="total_profit_rate" jdbcType="DOUBLE"/>
+		<result property="materialProfitRate" column="material_profit_rate" jdbcType="DOUBLE"/>
+		<result property="materialPrice" column="material_price" jdbcType="DOUBLE"/>
+		<result property="processPrice" column="process_price" jdbcType="DOUBLE"/>
+		<result property="cifPrice" column="cif_price" jdbcType="DOUBLE"/>
+		<result property="materialWeight" column="material_weight" jdbcType="DOUBLE"/>
+	</resultMap>
+	
+	<resultMap type="com.cbt.entity.QuotationProcessInfo" id="quotationProcessResultMap">
+		<id property="id" column="id" jdbcType="INTEGER"/>
+		<result property="quotationPriceId" column="quotation_price_id" jdbcType="INTEGER"/>
+		<result property="processName" column="process_name" jdbcType="VARCHAR"/>
+		<result property="processPrice" column="process_price" jdbcType="DOUBLE"/>
+		<result property="quantity" column="quantity" jdbcType="DOUBLE"/>
+		<result property="processFactoryPrice" column="process_factory_price" jdbcType="DOUBLE"/>
+	</resultMap>
+	<sql id="product_list">
+	id,quotation_info_id, product_name, mold_price,product_notes,material,update_time,price_status,
+	material_unit_price,material_loss,factory_price,point,rejection_rate,mold_profit_rate,mold_factory_price,process_list
+	</sql>
+	<sql id="price_list">
+	id,production_info_id,product_name,product_price,quantity,update_time,total_profit_rate,material_profit_rate,
+	cif_price,material_price,process_price,material_weight 
+	</sql>
+	<sql id="process_list">
+	id,quotation_price_id,process_name,process_price,quantity,process_factory_price 
+	</sql>
+	
+	<!-- 根据id查询产品 -->
+	<select id="queryProductionById" parameterType="int" resultMap="quotationProductionResultMap">
+	  select 
+	  <include refid="product_list"/> 
+	  from quotation_production_info 
+	  where id = #{id,jdbcType=INTEGER}	
+	  
+	</select>
+	
+	
+	<insert id="insertQuotationProduction" parameterType="com.cbt.entity.QuotationProductionBean" useGeneratedKeys="true" keyProperty="id">
+	  insert into quotation_production_info  
+	        (
+		    quotation_info_id, product_name, mold_price,mold_factory_price,product_notes,material,material_unit_price,material_loss,
+		    factory_price,point,rejection_rate,mold_profit_rate,process_list 
+            )
+          values
+            (
+            #{quotationInfoId,jdbcType=INTEGER},
+            #{productName,jdbcType=VARCHAR},
+            #{moldPrice,jdbcType=DOUBLE},
+            #{moldFactoryPrice,jdbcType=DOUBLE},
+            #{productNotes,jdbcType=LONGVARCHAR},  
+            #{material,jdbcType=VARCHAR},  
+            #{materialUnitPrice,jdbcType=DOUBLE},
+            #{materialLoss,jdbcType=DOUBLE},
+            #{factoryPrice,jdbcType=DOUBLE},
+            #{point,jdbcType=INTEGER},
+            #{rejectionRate,jdbcType=DOUBLE},
+            #{moldProfitRate,jdbcType=DOUBLE},
+            #{processList,jdbcType=VARCHAR}
+            )  
+	
+	</insert>
+	
+	
+	
+	
+	<!-- 	   批量插入报价产品数据 -->
+	<insert id="insertQuotationProductionBatch" parameterType="java.util.List">
+	    insert into quotation_production_info 
+		    (
+		    quotation_info_id, product_name, mold_price,product_notes,material,material_unit_price,material_loss,
+		    factory_price,process_list
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.quotationInfoId},#{item.productName},#{item.moldPrice},#{item.productNotes},#{item.material},
+		    #{item.materialUnitPrice},#{item.materialLoss},#{item.factoryPrice},#{item.processList}  
+	      )
+	    </foreach>
+	</insert>
+	
+	
+	<!-- 	   批量插入产品单价数量数据 -->
+	<insert id="insertQuotationPriceBatch" parameterType="java.util.List">
+	    insert into quotation_production_price 
+		    (
+		    production_info_id, product_name, product_price,quantity,total_profit_rate,material_profit_rate,
+		    material_price,process_price,material_weight  
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.productionInfoId},#{item.productName},#{item.productPrice},#{item.quantity},#{item.totalProfitRate},
+		    #{item.materialProfitRate}, #{item.materialPrice},#{item.processPrice},#{item.materialWeight}
+	      )
+	    </foreach>
+	</insert>
+	
+	<!-- 插入产品价格表 -->
+	<insert id="insertQuotationPrice" parameterType="com.cbt.entity.QuotationProductionPriceBean" useGeneratedKeys="true" keyProperty="id">
+	    insert into quotation_production_price 
+		    (
+		    production_info_id, product_name, product_price,quantity,total_profit_rate,material_profit_rate,
+		    material_price,process_price,material_weight  
+            )
+	    values
+	      (           
+		    #{productionInfoId,jdbcType=INTEGER},
+            #{productName,jdbcType=VARCHAR},
+            #{productPrice,jdbcType=DOUBLE},
+            #{quantity,jdbcType=INTEGER},  
+            #{totalProfitRate,jdbcType=DOUBLE},  
+            #{materialProfitRate,jdbcType=DOUBLE},
+            #{materialPrice,jdbcType=DOUBLE},
+            #{processPrice,jdbcType=DOUBLE},
+            #{materialWeight,jdbcType=DOUBLE}
+	      )
+	
+	</insert>
+	
+	
+	<delete id="deletePriceByQuotationId" parameterType="int">
+	     delete from quotation_production_info
+	     where quotation_info_id = #{quotationInfoId,jdbcType=INTEGER}
+	</delete>
+	
+	
+	<delete id="deletePriceByProductionId" parameterType="int">
+	     delete from quotation_production_price
+	     where production_info_id = #{productionInfoId,jdbcType=INTEGER}
+	</delete>
+	
+	
+	<delete id="deleteProductionById" parameterType="int">
+	     delete from quotation_production_info
+	     where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	<!-- 查询产品 -->
+	<select id="queryByQuotationInfoId" parameterType="int" resultMap="quotationProductionResultMap">
+	      select
+	      <include refid="product_list"/>
+	      from quotation_production_info
+	      where quotation_info_id = #{quotationInfoId,jdbcType=INTEGER}
+	</select>
+	
+	
+	<!-- 根据产品表id查询 -->
+	<select id="queryByProductionId" parameterType="int" resultMap="quotationProductionPriceResultMap">
+	      select  
+	     <include refid="price_list"/>  
+	      from quotation_production_price
+	      where production_info_id = #{productionInfoId,jdbcType=INTEGER}
+	</select>
+	
+	<!-- 根据价格表ID查询 -->
+	<select id="queryByPriceId" parameterType="int" resultMap="quotationProductionPriceResultMap">
+	     select  
+	     <include refid="price_list"/>  
+	      from quotation_production_price  
+	      where id = #{id,jdbcType=INTEGER}
+	</select>
+	
+	
+	<!--  -->
+	<select id="queryMinMaxPriceByProductId" resultType="java.util.HashMap">
+	       select min(product_price * quantity + mold_price)as minPrice,max(product_price * quantity + mold_price)as maxPrice 
+	        from 
+	 		(
+			select q1.id,q1.quotation_info_id,q1.mold_price,q2.product_price,q2.quantity from quotation_production_info q1 
+			  LEFT JOIN 
+			quotation_production_price q2 on q1.id = q2.production_info_id  
+			where production_info_id = #{productionInfoId,jdbcType=INTEGER}
+			)q3	
+	</select>
+	
+	
+	
+	
+	 <!-- 更新报价产品  -->
+    <update id="updateQuotationProduction" parameterType="com.cbt.entity.QuotationProductionBean">
+	    update quotation_production_info 
+		<set> 
+	    <if test="productName != null">
+			product_name = #{productName,jdbcType=VARCHAR},
+		</if>
+	    <if test="moldPrice != null">
+			mold_price = #{moldPrice,jdbcType=DOUBLE},
+		</if>
+	    <if test="productNotes != null">
+			product_notes = #{productNotes,jdbcType=LONGVARCHAR},
+		</if>	
+	    <if test="priceStatus != null">
+			price_status = #{priceStatus,jdbcType=INTEGER},
+		</if>	
+	    <if test="material != null">
+			material = #{material,jdbcType=VARCHAR},
+		</if>	
+	    <if test="moldProfitRate != null">
+			mold_profit_rate = #{moldProfitRate,jdbcType=DOUBLE},
+		</if>	
+	    </set>
+	     where id = #{id,jdbcType=INTEGER}	
+	</update>  
+	
+	
+
+	
+	
+	<!-- 批量更新价格 -->	
+	<update id="updateQuotationPriceBatch" parameterType="java.util.List">    
+     <foreach collection="list" item="item" index="index"  open="" close="" separator=";">   
+     	    update quotation_production_price   
+     	    <set>     
+			product_name = #{item.productName},
+			product_price = #{item.productPrice},
+			quantity = #{item.quantity},
+			total_profit_rate = #{item.totalProfitRate},
+			material_profit_rate = #{item.materialProfitRate},
+			cif_price = #{item.cifPrice},
+			material_weight = #{item.materialWeight},
+			update_time = #{item.updateTime}
+			</set> 
+            where id = #{item.id}            
+     </foreach>  
+     
+    </update> 
+    
+    
+    
+    <!-- 查询产品工艺 -->
+	<select id="queryProcessByProductionId" parameterType="int" resultMap="quotationProcessResultMap">
+	      select  
+	     <include refid="process_list"/>  
+	      from quotation_process_info
+	      where quotation_price_id = #{quotationPriceId,jdbcType=INTEGER}
+	</select>
+	
+	
+	
+    <!-- 根据id查询产品工艺 -->
+	<select id="queryProcessById" parameterType="int" resultMap="quotationProcessResultMap">
+	      select  
+	     <include refid="process_list"/>  
+	      from quotation_process_info   
+	      where id = #{id,jdbcType=INTEGER} 
+	</select>
+    
+    	
+    	
+	<!-- 批量更新工艺 -->	
+	<update id="updateProcessBatch" parameterType="java.util.List">    
+     <foreach collection="list" item="item" index="index"  open="" close="" separator=";">   
+     	    update quotation_process_info   
+     	    <set>     
+			process_name = #{item.processName},
+			process_price = #{item.processPrice},
+			process_factory_price = #{item.processFactoryPrice} 
+			</set> 
+            where id = #{item.id}            
+     </foreach>  
+     
+    </update> 
+	
+	<!-- 	   批量插入产品工艺 -->
+	<insert id="insertQuotationProcessBatch" parameterType="java.util.List">
+	    insert into quotation_process_info 
+		    (
+		   quotation_price_id,process_name,process_price,quantity,process_factory_price  
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.quotationPriceId},#{item.processName},#{item.processPrice},#{item.quantity},#{item.processFactoryPrice}  
+	      )
+	    </foreach>
+	</insert>
+</mapper>

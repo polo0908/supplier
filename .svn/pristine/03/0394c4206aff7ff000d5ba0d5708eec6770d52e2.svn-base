@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.InvoiceInfoDao">
+
+	<resultMap id="InvoiceInfoResultMap" type="com.cbt.entity.InvoiceInfo">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="userid" property="userid" jdbcType="VARCHAR" />
+		<result column="sales_id" property="salesId" jdbcType="VARCHAR" />
+		<result column="order_id" property="orderId" jdbcType="VARCHAR" />
+		<result column="invoice_id" property="invoiceId" jdbcType="VARCHAR" />
+		<result column="amount_unit" property="amountUnit" jdbcType="INTEGER" />
+		<result column="product_price" property="productPrice" jdbcType="DOUBLE" />
+		<result column="other_price" property="otherPrice" jdbcType="DOUBLE" />
+		<result column="mold_price" property="moldPrice" jdbcType="DOUBLE" />
+		<result column="transaction_type" property="transactionType" jdbcType="INTEGER" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="invoice_path" property="invoicePath" jdbcType="VARCHAR" />
+		<result column="shipping_fee" property="shippingFee" jdbcType="DOUBLE" />
+		<result column="comment" property="comment" jdbcType="VARCHAR" />
+		<result column="factory_id" property="factoryId" jdbcType="VARCHAR" />
+		<result column="invoice_remark_id" property="invoiceRemarkId" jdbcType="INTEGER" />
+		<result column="amount" property="amount" jdbcType="DOUBLE" />
+		
+		
+		
+		
+				<!-- 虚拟字段 -->
+		<result column="sum_amount_actual" property="sumAmountActual"/>
+		<result column="amount_actual" property="amountActual"/>
+		<result column="payment_time" property="paymentTime"/>
+     
+	</resultMap> 
+
+	<sql id="InvoiceInfoColumnList">
+		id, userid, sales_id, order_id, invoice_id,amount, 
+		amount_unit, product_price, mold_price, other_price, transaction_type, 
+	    update_time, create_time, invoice_path, shipping_fee, comment, factory_id,invoice_remark_id
+	</sql>
+	
+	<select id="queryInvoiceByOrderId" resultMap="InvoiceInfoResultMap" parameterType="string">
+	     select  
+	    ss.id, 
+        ss.order_id,ss.invoice_id,ss.amount,ss.amount_unit,ss.update_time,ss.create_time,
+		ss.invoice_path,ss.factory_id,ss.payment_time as payment_time,ss.payment_amount as amount_actual,
+		sum(ss.payment_amount)as sum_amount_actual             
+	    from 
+		(
+		select info.id,info.order_id,info.invoice_id,info.amount,info.amount_unit,info.update_time,info.create_time,
+		info.invoice_path,info.factory_id,p.payment_time,p.amount_actual as payment_amount from invoice_info info  
+		left join 
+		payment_plan p 
+		on   
+		info.invoice_id = p.invoice_id  
+		where info.order_id = #{orderId,jdbcType=VARCHAR} GROUP BY p.payment_time,p.invoice_id order by p.payment_time desc
+		)ss GROUP BY ss.invoice_id   	
+	</select>
+	
+	<!-- 根据id查询 -->
+	<select id="queryById" resultMap="InvoiceInfoResultMap" parameterType="int">
+	    select 
+	    <include refid="InvoiceInfoColumnList" /> 
+	    from invoice_info 
+	    where id = #{id,jdbcType=INTEGER}	
+	</select>
+	
+	<select id="queryByInvoiceId" resultMap="InvoiceInfoResultMap">
+	    select 
+	    <include refid="InvoiceInfoColumnList" /> 
+	    from invoice_info 
+	    where invoice_id = #{invoiceId,jdbcType=VARCHAR} and factory_id = #{factoryId,jdbcType=VARCHAR}
+	
+	</select>
+     <!-- 单条插入InvoiceInfo数据 -->
+	<insert id="insertInvoiceInfo" parameterType="com.cbt.entity.InvoiceInfo">
+	    insert into invoice_info 
+		    (
+		    userid, sales_id, order_id, invoice_id, amount,
+		    amount_unit, product_price, mold_price, other_price, transaction_type, 
+		    update_time, create_time, invoice_path, shipping_fee, comment, factory_id,invoice_remark_id
+            )
+	    values	    
+	      (          
+		    #{userid,jdbcType=VARCHAR},
+		    #{salesId,jdbcType=VARCHAR},
+		    #{orderId,jdbcType=VARCHAR},
+		    #{invoiceId,jdbcType=VARCHAR}, 
+		    #{amount,jdbcType=DOUBLE}, 
+		    #{amountUnit,jdbcType=INTEGER},
+		    #{productPrice,jdbcType=DOUBLE},
+		    #{moldPrice,jdbcType=DOUBLE},
+		    #{otherPrice,jdbcType=DOUBLE}, 
+		    #{transactionType,jdbcType=INTEGER},
+            #{updateTime,jdbcType=TIMESTAMP},
+            #{createTime,jdbcType=TIMESTAMP},
+            #{invoicePath,jdbcType=VARCHAR}, 
+            #{shippingFee,jdbcType=DOUBLE},
+            #{comment,jdbcType=VARCHAR},
+            #{factoryId,jdbcType=VARCHAR},
+            #{invoiceRemarkId,jdbcType=VARCHAR}
+	      )
+
+	</insert>
+	
+	
+	    <!--  批量插入invoice数据 (用于ERP发票数据导入)-->
+	<insert id="insertInvoiceBatch" parameterType="java.util.List">
+	    insert into invoice_info 
+		    (userid, sales_id, order_id, invoice_id, amount,amount_unit, transaction_type, create_time,factory_id  
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.userid},#{item.salesId},#{item.orderId},
+		    #{item.invoiceId},#{item.amount},#{item.amountUnit},
+		    #{item.transactionType},#{item.createTime},#{item.factoryId}
+	      )
+	    </foreach>
+	</insert>
+	
+    
+    <update id="updateInvoiceInfo" parameterType="com.cbt.entity.InvoiceInfo">
+	    update invoice_info 
+		<set> 
+	    <if test="salesId != null">
+			sales_id = #{salesId,jdbcType=VARCHAR},
+		</if>
+	    <if test="amount != null">
+			amount = #{amount,jdbcType=DOUBLE},
+		</if>
+	    <if test="amountUnit != null">
+			amount_unit = #{amountUnit,jdbcType=INTEGER},
+		</if>
+	    <if test="productPrice != null">
+			product_price = #{productPrice,jdbcType=DOUBLE},
+		</if>
+	    <if test="moldPrice != null">
+			mold_price = #{moldPrice,jdbcType=DOUBLE},
+		</if>
+	    <if test="otherPrice != null">
+			other_price = #{otherPrice,jdbcType=DOUBLE},
+		</if>
+	    <if test="transactionType != null">
+			transaction_type = #{transactionType,jdbcType=INTEGER},
+		</if>
+	    <if test="updateTime != null">
+			update_time = #{updateTime,jdbcType=TIMESTAMP},
+		</if>
+	    <if test="invoicePath != null">
+			invoice_path = #{invoicePath,jdbcType=VARCHAR},
+		</if>
+	    <if test="comment != null">
+			comment = #{comment,jdbcType=VARCHAR},
+		</if>
+	    <if test="shippingFee != null">
+			shipping_fee = #{shippingFee,jdbcType=DOUBLE},
+		</if>
+	    <if test="invoiceRemarkId != null">
+			invoice_remark_id = #{invoiceRemarkId,jdbcType=INTEGER},
+		</if>
+	    </set>
+		    where invoice_id = #{invoiceId,jdbcType=VARCHAR}	    
+	 </update>
+	
+	 <delete id="deleteInvoiceById" parameterType="java.lang.Integer">
+		delete from
+		invoice_info
+		where
+		id = #{id,jdbcType=INTEGER}
+	</delete>
+    
+	
+</mapper>

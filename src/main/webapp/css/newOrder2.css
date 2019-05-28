@@ -1,0 +1,184 @@
+.bianhaolan{
+    margin-top: 20px;
+    float: none;
+    text-shadow: 0 1px 0 #ffffff;
+    margin-left: 20px;
+    position: relative;
+}
+.bianhaolan .bianhao{
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+    float: left;
+    margin-left: 8%;
+}
+.bianhaolan .fapiao,.bianhaolan .jine{
+    float: left;
+  /*  margin-left: 8%;*/
+}
+.bianhaolan .fapiao>input,.bianhaolan .jine>select{
+    margin-top: -5px;
+    margin-left: 38px;
+    margin-bottom: 20px;
+}
+.bianhaolan .fapiao>label{
+    float: left;
+}
+.bianhaolan .jine>label{
+    float: left;
+}
+.div-left{
+    float: left;
+}
+.div-left span{
+    font-size: 14px;
+    color:#d14;
+}
+.gradeA>td{
+    text-align: center;
+}
+.widget-box{
+    margin-top:0px ;
+}
+.controls>span{
+    color:#d14;
+}
+.bianhaolan{
+    width: 100%;
+}
+.control-group:before, .control-group:after{
+    display: table;
+    line-height: 0;
+    content: "";
+}
+.control-label {
+    padding-top: 15px;
+    /* width: 180px;*/
+    float: left;
+    text-align: right;
+}
+.cont-label {
+    padding-top: 15px;
+    /* width: 180px;*/
+    float: left;
+    width: 100%;
+}
+.controls {
+    margin-left: 90px;
+    padding: 10px 0;
+}
+/*
+div.uploader span.action{
+    background-color: transparent;
+}*/
+.uploader input{
+    display: inline-block;
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+div.uploader span.action{
+    background-color: #eee;
+}
+.control-group{
+    margin-bottom: 0px;
+}
+.pull-right{
+    float: left;
+    margin-top: 30px;
+}
+/*.pull-right a{
+    padding: 10px 30px;
+}*/
+.span .span-p1,.span-p2{
+    margin: 10px 0;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 16px;
+    /* float: left;*/
+    line-height: 20px;
+    color: inherit;
+    text-rendering: optimizelegibility;
+}
+.span .span-p2{
+    float: left;
+    display: inline-block;
+}
+.tbody-td td{
+    text-align: center;
+}
+.fluid-div{
+    width: 50%;
+}
+.div-span{
+    margin-top: 10px;
+    float: none;
+    text-shadow: 0 1px 0 #ffffff;
+    position: relative;
+}
+.div-span .bianhao {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+    float: left;
+}
+.div-span .bianhao2 {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+    float: left;
+    margin-left:5%;
+}
+/*.pull-right{
+    float: right;
+}*/
+.waimian{
+    padding: 20px;
+    margin-top: 20px;
+}
+.div-label2{
+    width: 30%;
+}
+.div-con{
+    width: 70%;
+}
+.con-group{
+    width: 20%;
+    float: left;
+}
+.con-group ul{
+    margin: 0;
+}
+.con-group ul li{
+    list-style: none;
+}
+.con-group ul{
+    margin-top: 50px;
+}
+.xiala_select{
+    margin-bottom: 0;
+    margin-bottom: 0;
+/*    width: 35%;*/
+   /* float: left;*/
+}
+.btn-large {
+    padding: 8px 19px;
+    font-size: 17.5px;
+
+}
+.grade-tr td input{
+    background: #eee;
+    border: none;
+    margin-bottom: 0px;
+}
+.table th, .table td{
+    vertical-align:middle;
+}
+.gradeA{width: 100%;}
+.gradeA td input{width: 90%;}
+.w-control-group .controls .w-controls-span{position: absolute;margin-left:0px;border: 1pt solid #c1c1c1;overflow: hidden;width: 220px;height: 28px;clip: rect(-1px, 220px, 220px, 170px);}
+.w-control-group{height:60px;}
+.w-controls-select{ width: 220px;height: 30px;margin: -1px;}
+.w-control-group .controls .w-controls-span2{position: absolute;margin-left:0px;border-top: 1pt solid #c1c1c1;border-left: 1pt solid #c1c1c1;border-bottom: 1pt solid #c1c1c1;width: 200px;height: 28px;}
+.w-controls-span2 .w-controls-input{width: 186px;height: 20px;border: 0pt;}

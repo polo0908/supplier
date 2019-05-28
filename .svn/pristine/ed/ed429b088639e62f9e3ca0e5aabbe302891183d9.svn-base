@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.ClientOrderDao">
+
+
+	<resultMap id="ClientOrderResultMap" type="com.cbt.entity.ClientOrder">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="userid" property="userid" jdbcType="VARCHAR" />
+		<result column="order_id" property="orderId" jdbcType="VARCHAR" />
+		<result column="amount" property="amount" jdbcType="DOUBLE" />
+		<result column="order_status" property="orderStatus" jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="DATE" />
+		<result column="output_time" property="outputTime" jdbcType="DATE" />
+		<result column="po_Path" property="poPath" jdbcType="VARCHAR" />
+<!-- 		<result column="invoice_path" property="invoicePath" jdbcType="VARCHAR" /> -->
+		<result column="qc_report_path" property="qcReportPath" jdbcType="VARCHAR" />
+		<result column="shipping_doc_path" property="shippingDocPath" jdbcType="VARCHAR" />
+		<result column="invoice_ids" property="invoiceIds" jdbcType="VARCHAR" />
+		<result column="username" property="userName" jdbcType="VARCHAR" />
+		<result column="order_source" property="orderSource" jdbcType="INTEGER" />
+		<result column="po_update_time" property="poUpdateTime" jdbcType="TIMESTAMP" />
+		<result column="qc_update_time" property="qcUpdateTime" jdbcType="TIMESTAMP" />
+		<result column="shipping_update_time" property="shippingUpdateTime" jdbcType="TIMESTAMP" />
+		<result column="old_or_new_po" property="oldOrNewPo" jdbcType="VARCHAR" />
+		<result column="old_or_new_qc" property="oldOrNewQc" jdbcType="VARCHAR" />
+		<result column="old_or_new_shipping" property="oldOrNewShipping" jdbcType="VARCHAR" />
+		<result column="po_number" property="poNumber" jdbcType="VARCHAR" />
+	    <result column="delivery_time" property="deliveryTime" jdbcType="DATE" />
+		<result column="factory_id" property="factoryId" jdbcType="VARCHAR" />
+		<result column="arrival_date" property="arrivalDate" jdbcType="DATE" />
+		<result column="BL_available_date" property="BLAvailableDate" jdbcType="DATE" />
+		<result column="ISF_date" property="ISFDate" jdbcType="DATE" />
+		<result column="actual_amount" property="actualAmount" jdbcType="DOUBLE" />
+		<result column="order_type_id" property="orderTypeId" jdbcType="INTEGER" />
+		<result column="order_request" property="orderRequest" jdbcType="LONGVARCHAR" />
+		<result column="exchange_rate_CNY" property="exchangeRateCNY" jdbcType="DOUBLE"/>
+		<result column="exchange_rate_EUR" property="exchangeRateEUR" jdbcType="DOUBLE"/>
+		<result column="exchange_rate_GBP" property="exchangeRateGBP" jdbcType="DOUBLE"/>
+		<result column="sales_name"  property="salesName" jdbcType="VARCHAR"/>
+		<result property="projectName" column="project_name" jdbcType="VARCHAR"/>
+		<result property="paymentReceived" column="payment_received" jdbcType="DATE"/>
+		
+		
+		
+		<result column="order_type" property="orderType" jdbcType="VARCHAR" />
+		
+		
+		
+		<association property="user" javaType="com.cbt.entity.User">
+	        <id column="id" property="id" jdbcType="INTEGER" />
+			<result column="userid" property="userid" jdbcType="VARCHAR" />
+			<result column="username" property="userName" jdbcType="VARCHAR" />
+			<result column="login_email" property="loginEmail" jdbcType="VARCHAR" />
+	        <result column="tel" property="tel" jdbcType="VARCHAR" />
+		</association>
+		
+		<association property="saleCustomer" javaType="com.cbt.entity.SaleCustomer">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="salesId" property="salesId" jdbcType="VARCHAR" />
+		<result column="userid" property="userid" jdbcType="VARCHAR" />
+	    </association> 
+	     
+	    
+	</resultMap> 
+	<resultMap type="com.cbt.entity.ClientOrderType" id="clientOrderTypeResultMap">
+        <id column="id" property="id" jdbcType="INTEGER" />
+		<result column="order_type" property="orderType" jdbcType="VARCHAR" />
+	</resultMap>
+	
+
+	<sql id="ClientOrderColumnList">
+		id, userid, order_id, amount,
+		order_status, create_time,
+		output_time,po_path,
+		qc_report_path,shipping_doc_path,invoice_ids,order_source,
+		po_update_time, qc_update_time, shipping_update_time, old_or_new_po, 
+		old_or_new_qc, old_or_new_shipping, po_number, delivery_time,factory_id,
+		arrival_date,BL_available_date,ISF_date,actual_amount,order_type_id,order_request,
+		exchange_rate_CNY,exchange_rate_EUR,exchange_rate_GBP,sales_name,project_name,payment_received
+	</sql>
+
+    <!-- 动态查询订单总数 -->
+    <select id="totalAmount" resultType="int" parameterType="com.cbt.entity.ClientOrderQuery">
+			select count(*) from 
+                   (select f.* from 
+						(
+						  select d.* ,concat_ws ('', userid, username,order_id) as t from 
+							  (
+								select c.*, u.username as username from client_order c
+								LEFT JOIN 
+								user u on c.userid = u.userid 
+							  ) d  
+					    ) f 
+				   INNER JOIN 
+				   (select s.order_id from sale_order s LEFT JOIN back_user b on b.backuserId = s.salesId where s.salesId = #{salesId,jdbcType=VARCHAR})q 
+				   on 
+				   f.order_id = q.order_id 					
+				   where 1=1  
+				        and factory_id = #{factoryId,jdbcType=VARCHAR}  
+						<if test="userName !=null and userName !='' ">
+							and t like '%${userName}%'
+						</if>
+						<if test="userid !=null and userid !='' ">
+							and userid = #{userid,jdbcType=VARCHAR}
+						</if>
+						<if test="beginDate !=null ">
+							and Date(create_time) &gt;= Date(#{beginDate,jdbcType=DATE})
+						</if>
+						<if test="endDate !=null ">
+							and Date(create_time) &lt;= Date(#{endDate,jdbcType=DATE})
+						</if>		
+						<if test="orderTypeId !=null and orderTypeId != ''">
+							and order_type_id = #{orderTypeId,jdbcType=INTEGER}	
+						</if>  
+						<if test="orderTypeId ==null or orderTypeId == ''">
+							and order_type_id != 4
+						</if>  	
+						
+					) cd
+	</select>
+	
+	
+	<!-- 根据userName、userId、时间节点查询订单 -->
+    <select id="queryListByDate" resultMap="ClientOrderResultMap"
+		parameterType="com.cbt.entity.ClientOrderQuery">
+
+			select f.* from 
+			(
+			  select d.* ,concat_ws ('', userid, username,order_id) as t from 
+					(
+						  select c.*, u.username as username, u.login_email as login_email  from 
+						         (
+						         select cp.*,ct.order_type from 
+						         client_order cp 
+						         left join client_order_type ct
+						         on
+						         cp.order_type_id = ct.id
+						         )c
+						  left join 
+						  user u 
+						  on c.userid = u.userid 
+					 ) d  
+			 ) f 
+	 
+		    INNER JOIN 
+			(select s.order_id from sale_order s LEFT JOIN back_user b on b.backuserId = s.salesId where s.salesId = #{salesId,jdbcType=VARCHAR} )q 
+			on 
+			f.order_id = q.order_id 					
+		    where 1=1  
+		    and factory_id = #{factoryId,jdbcType=VARCHAR}
+			<if test="userName !=null and userName !='' ">
+				and t like '%${userName}%'
+			</if>				
+			<if test="beginDate !=null and beginDate != '' " >				   
+				and Date(create_time) &gt;= Date(#{beginDate,jdbcType=DATE})
+			</if>
+			<if test="endDate !=null and endDate != '' ">
+				and Date(create_time) &lt;= Date(#{endDate,jdbcType=DATE})
+			</if>
+			<if test="orderTypeId !=null and orderTypeId != ''">
+				and order_type_id = #{orderTypeId,jdbcType=INTEGER}	
+			</if>  
+			<if test="orderTypeId ==null or orderTypeId == ''">
+				and order_type_id != 4
+			</if>  	
+          order by f.order_type_id,f.create_time desc
+		  limit #{start}, #{pageSize}
+
+	</select>
+	
+	
+	<!-- 根据userName、userId、时间节点查询订单(根据客户排序) -->
+    <select id="queryListByDateOrderByUser" resultMap="ClientOrderResultMap"
+		parameterType="com.cbt.entity.ClientOrderQuery">
+
+			select f.* from 
+			(
+			  select d.* ,concat_ws ('', userid, username,order_id) as t from 
+					(
+					  select c.*, u.username as username, u.login_email as login_email  from 
+					            (
+						         select cp.*,ct.order_type from 
+						         client_order cp 
+						         left join client_order_type ct
+						         on
+						         cp.order_type_id = ct.id
+						         )c
+					  
+					  left join user u on c.userid = u.userid 
+					 ) d  
+			 ) f 
+	 
+		    INNER JOIN 
+			(select s.order_id from sale_order s LEFT JOIN back_user b on b.backuserId = s.salesId where s.salesId = #{salesId,jdbcType=VARCHAR})q 
+			on 
+			f.order_id = q.order_id 					
+		    where 1=1  
+		    and factory_id = #{factoryId,jdbcType=VARCHAR} 
+			<if test="userName !=null and userName !='' ">
+				and t like '%${userName}%'
+			</if>				
+			<if test="beginDate !=null and beginDate != '' " >				   
+				and Date(create_time) &gt;= Date(#{beginDate,jdbcType=DATE})
+			</if>
+			<if test="endDate !=null and endDate != '' ">
+				and Date(create_time) &lt;= Date(#{endDate,jdbcType=DATE})
+			</if>  
+			<if test="orderTypeId !=null and orderTypeId != ''">
+				and order_type_id = #{orderTypeId,jdbcType=INTEGER}	
+			</if>  
+			<if test="orderTypeId ==null or orderTypeId == ''">
+				and order_type_id != 4
+			</if>  	
+          order by f.userid,f.order_type_id,f.create_time desc
+		  limit #{start}, #{pageSize}
+
+	</select>
+	
+    <!-- 动态查询订单总数 (管理员查询)-->
+    <select id="totalAmountAdmin" resultType="int" parameterType="com.cbt.entity.ClientOrderQuery">
+			select count(*) from 
+                   (
+                    select * from (
+						  select d.* ,concat_ws ('', userid, username,order_id) as t from 
+							  (
+								select c.*, u.username as username  from client_order c  LEFT JOIN user u on c.userid = u.userid 
+							  ) d  
+						)f	  
+				where  
+				factory_id = #{factoryId,jdbcType=VARCHAR} 
+				and  
+				EXISTS(select permission from back_user where backuserId = #{salesId,jdbcType=VARCHAR} and permission=1)
+						<if test="userName !=null and userName !='' ">
+							and t like '%${userName}%'
+						</if>
+						<if test="userid !=null and userid !='' ">
+							and userid = #{userid,jdbcType=VARCHAR}
+						</if>
+						<if test="beginDate !=null ">
+							and Date(create_time) &gt;= Date(#{beginDate,jdbcType=DATE})
+						</if>
+						<if test="endDate !=null ">
+							and Date(create_time) &lt;= Date(#{endDate,jdbcType=DATE})
+						</if>	
+						
+						<if test="orderTypeId !=null and orderTypeId != ''">
+							and order_type_id = #{orderTypeId,jdbcType=INTEGER}	
+						</if>  
+						<if test="orderTypeId ==null or orderTypeId == ''">
+							and order_type_id != 4
+						</if>  										
+					) cd
+	</select>
+	
+	
+	<!-- 根据userName、userId、时间节点查询订单  (管理员查询)-->
+    <select id="queryListByDateAdmin" resultMap="ClientOrderResultMap"
+		parameterType="com.cbt.entity.ClientOrderQuery">
+            select * from (
+			  select d.* ,concat_ws ('', userid, username,order_id) as t from 
+					(
+					  select c.*, u.username as username, u.login_email as login_email  from 
+					  				(
+							         select cp.*,ct.order_type from 
+							         client_order cp 
+							         left join client_order_type ct
+							         on
+							         cp.order_type_id = ct.id
+							         )c 
+					  left join user u on c.userid = u.userid 
+					 ) d 
+			  )f		   	    
+		   where 
+		   factory_id = #{factoryId,jdbcType=VARCHAR} 
+			<if test="userName !=null and userName !='' ">
+				and t like '%${userName}%'
+			</if>				
+			<if test="beginDate !=null and beginDate != '' " >				   
+				and Date(create_time) &gt;= Date(#{beginDate,jdbcType=DATE})
+			</if>
+			<if test="endDate !=null and endDate != '' ">
+				and Date(create_time) &lt;= Date(#{endDate,jdbcType=DATE})
+			</if>  
+			<if test="orderTypeId !=null and orderTypeId != ''">
+				and order_type_id = #{orderTypeId,jdbcType=INTEGER}	
+			</if>  
+			<if test="orderTypeId ==null or orderTypeId == ''">
+				and order_type_id != 4
+			</if>  
+          ORDER BY f.order_type_id,create_time desc
+		  limit #{start}, #{pageSize}
+	</select>
+	
+	
+	<!-- 根据userName、userId、时间节点查询订单  (管理员查询)(根据客户排序)-->
+    <select id="queryListByDateAdminOrderByUser" resultMap="ClientOrderResultMap"
+		parameterType="com.cbt.entity.ClientOrderQuery">
+            select * from (
+			  select d.* ,concat_ws ('', userid, username,order_id) as t from 
+					(
+					  select c.*, u.username as username, u.login_email as login_email  from client_order c  left join user u on c.userid = u.userid 
+					 ) d 
+			  )f		   	    
+		   where 
+		   factory_id = #{factoryId,jdbcType=VARCHAR} 
+			<if test="userName !=null and userName !='' ">
+				and t like '%${userName}%'
+			</if>				
+			<if test="beginDate !=null and beginDate != '' " >				   
+				and Date(create_time) &gt;= Date(#{beginDate,jdbcType=DATE})
+			</if>
+			<if test="endDate !=null and endDate != '' ">
+				and Date(create_time) &lt;= Date(#{endDate,jdbcType=DATE})
+			</if>  
+			<if test="orderTypeId !=null and orderTypeId != ''">
+				and order_type_id = #{orderTypeId,jdbcType=INTEGER}	
+			</if>  
+			<if test="orderTypeId ==null or orderTypeId == ''">
+				and order_type_id != 4
+			</if>  	
+          ORDER BY userid,f.order_type_id,create_time desc
+		  limit #{start}, #{pageSize}
+	</select>
+
+	<!-- 根据id查询 -->
+	<select id="queryById" resultMap="ClientOrderResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="ClientOrderColumnList" />
+		from client_order
+		where id = #{id,jdbcType=VARCHAR}
+	</select>
+
+	
+   <!-- 根据订单号查询 -->
+	<select id="queryByOrderId" resultMap="ClientOrderResultMap"
+		parameterType="java.lang.String">
+		select 
+	    <include refid="ClientOrderColumnList" />
+		from client_order
+		where order_id = #{orderId,jdbcType=VARCHAR}
+	</select>
+	
+	
+     <!-- 单条插入clientOrder数据 -->
+	<insert id="insertClientOrder" parameterType="com.cbt.entity.ClientOrder" useGeneratedKeys="true" keyProperty="id">
+	    insert into client_order 
+		    (
+		    userid, order_id, amount,actual_amount,
+			order_status, create_time,
+			output_time,
+			po_path,
+			qc_report_path,shipping_doc_path,order_source,
+			po_update_time, qc_update_time, shipping_update_time, old_or_new_po,
+			old_or_new_qc, old_or_new_shipping, po_number,factory_id,order_type_id,order_request,
+			exchange_rate_CNY,exchange_rate_EUR,exchange_rate_GBP ,sales_name,project_name,payment_received
+            )
+	    values	    
+	      (  
+	        
+				#{userid,jdbcType=VARCHAR},
+			    #{orderId,jdbcType=VARCHAR},
+                #{amount,jdbcType=DOUBLE},
+                #{actualAmount,jdbcType=DOUBLE},
+				#{orderStatus,jdbcType=INTEGER},
+				#{createTime,jdbcType=DATE},
+				#{outputTime,jdbcType=DATE},
+				#{poPath,jdbcType=VARCHAR},
+				#{qcReportPath,jdbcType=VARCHAR},
+				#{shippingDocPath,jdbcType=VARCHAR},
+				#{orderSource,jdbcType=INTEGER},
+				#{poUpdateTime,jdbcType=TIMESTAMP},
+				#{qcUpdateTime,jdbcType=TIMESTAMP},
+				#{shippingUpdateTime,jdbcType=TIMESTAMP},
+				#{oldOrNewPo,jdbcType=VARCHAR}, 
+				#{oldOrNewQc,jdbcType=VARCHAR}, 
+				#{oldOrNewShipping,jdbcType=VARCHAR},
+				#{poNumber,jdbcType=VARCHAR},
+				#{factoryId,jdbcType=VARCHAR},
+                #{orderTypeId,jdbcType=INTEGER},
+                #{orderRequest,jdbcType=LONGVARCHAR},
+                #{exchangeRateCNY,jdbcType=DOUBLE},
+                #{exchangeRateEUR,jdbcType=DOUBLE},
+                #{exchangeRateGBP,jdbcType=DOUBLE},
+                #{salesName,jdbcType=VARCHAR},
+                #{projectName,jdbcType=VARCHAR},
+                #{paymentReceived,jdbcType=DATE}
+
+	      )
+
+	</insert>
+	
+    <!-- 	   批量插入clientOrder数据 -->
+	<insert id="insertClientOrders" parameterType="java.util.List">
+	    insert into client_order 
+		    (
+		    userid, order_id, amount,
+			create_time,order_source,factory_id
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.userid},#{item.orderId},#{item.amount},  
+		    #{item.createTime}, 
+            #{item.orderSource},
+            #{item.factoryId}
+	      )
+	    </foreach>
+	</insert>
+    
+    <!-- 更新clientOrder数据 -->
+    <update id="updateClientOrder" parameterType="com.cbt.entity.ClientOrder">
+	    update client_order 
+		<set> 
+	    <if test="poPath != null">
+			po_path = #{poPath,jdbcType=VARCHAR},
+		</if>
+	    <if test="qcReportPath != null">
+			qc_report_path = #{qcReportPath,jdbcType=VARCHAR},
+		</if>
+	    <if test="shippingDocPath != null">
+			shipping_doc_path = #{shippingDocPath,jdbcType=VARCHAR},
+		</if>
+	    <if test="invoiceIds != null">
+			invoice_ids = #{invoiceIds,jdbcType=VARCHAR},
+		</if>
+	    <if test="orderSource != null">
+			order_source = #{orderSource,jdbcType=INTEGER},
+		</if>
+	    <if test="orderStatus != null">
+			order_status = #{orderStatus,jdbcType=INTEGER},
+		</if>
+		<if test="createTime != null">
+			create_time = #{createTime,jdbcType=DATE},
+		</if>
+		<if test="outputTime != null">
+			output_time = #{outputTime,jdbcType=DATE},
+		</if>
+	    <if test="amount != null">
+			amount = #{amount,jdbcType=DOUBLE},
+		</if>
+	    <if test="poUpdateTime != null">
+			po_update_time = #{poUpdateTime,jdbcType=TIMESTAMP},
+		</if>
+	    <if test="qcUpdateTime != null">
+			qc_update_time = #{qcUpdateTime,jdbcType=TIMESTAMP},
+		</if>
+	    <if test="shippingUpdateTime != null">
+			shipping_update_time = #{shippingUpdateTime,jdbcType=TIMESTAMP},
+		</if>
+	    <if test="oldOrNewPo != null">
+			old_or_new_po = #{oldOrNewPo,jdbcType=VARCHAR},
+		</if>
+	    <if test="oldOrNewQc != null">
+			old_or_new_qc = #{oldOrNewQc,jdbcType=VARCHAR},
+		</if>
+	    <if test="oldOrNewShipping != null">
+			old_or_new_shipping = #{oldOrNewShipping,jdbcType=VARCHAR},
+		</if>
+	    <if test="poNumber != null">
+			po_number = #{poNumber,jdbcType=VARCHAR},
+		</if>
+		<if test="arrivalDate != null">
+			arrival_date = #{arrivalDate,jdbcType=DATE},
+		</if>
+		<if test="deliveryTime != null">
+			delivery_time = #{deliveryTime,jdbcType=DATE},
+		</if>
+		<if test="BLAvailableDate != null">
+			BL_available_date = #{BLAvailableDate,jdbcType=DATE},
+		</if>
+		<if test="ISFDate != null">
+			ISF_date = #{ISFDate,jdbcType=DATE},
+		</if>
+		<if test="actualAmount != null">
+			actual_amount = #{actualAmount,jdbcType=DOUBLE},
+		</if>
+		<if test="orderTypeId != null">
+			order_type_id = #{orderTypeId,jdbcType=INTEGER},
+		</if>
+		<if test="orderRequest != null">
+			order_request = #{orderRequest,jdbcType=LONGVARCHAR},
+		</if>
+		<if test="salesName != null">
+			sales_name = #{salesName,jdbcType=VARCHAR},
+		</if>
+		<if test="projectName != null">
+			project_name = #{projectName,jdbcType=VARCHAR},
+		</if>
+		<if test="paymentReceived != null">
+			payment_received = #{paymentReceived,jdbcType=DATE},
+		</if>
+	    </set>
+		    where id = #{id,jdbcType=INTEGER}	    
+	 </update>
+	
+	
+    
+    
+    
+	
+	 <!-- 批量更新消息读取状态 -->	
+	<update id="updateBatch" parameterType="java.util.List">    
+     <foreach collection="list" item="item" index="index"  open="" close="" separator=";">   
+     	    update client_order  
+     	    <set>     
+			amount = #{item.amount}
+			</set> 
+            where id = #{item.id}            
+     </foreach>  
+     
+    </update> 
+    
+    
+    
+    
+    
+    <!-- 查询所有类型 -->
+    <select id="queryAllType" resultMap="clientOrderTypeResultMap">
+           select * from client_order_type
+    </select>
+    
+    
+    <!-- 根据id查询 -->
+    <select id="queryTypeById" resultMap="clientOrderTypeResultMap" parameterType="int">
+           select * from client_order_type where id = #{id,jdbcType=INTEGER} 
+    </select>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+	
+</mapper>

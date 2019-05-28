@@ -1,0 +1,119 @@
+package com.cbt.util;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
+import org.apache.poi.hssf.usermodel.HSSFPatriarch;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.util.IOUtils;
+
+import com.artofsolving.jodconverter.DocumentConverter;
+import com.artofsolving.jodconverter.openoffice.connection.OpenOfficeConnection;
+import com.artofsolving.jodconverter.openoffice.connection.SocketOpenOfficeConnection;
+import com.artofsolving.jodconverter.openoffice.converter.OpenOfficeDocumentConverter;
+import com.cbt.entity.PicGps;
+
+public class PicturePdfUtil {
+	
+//	private static String openOfficePath = "C:\\Program Files (x86)\\OpenOffice 4";
+	private static String openOfficePath = "/opt/openoffice4";
+	public static void setPictures(String pic, HSSFSheet sheet, PicGps picGps)
+			throws IOException {
+		File imageFile = new File(pic);
+		if (imageFile.exists()) {
+			InputStream is = new FileInputStream(new File(pic));
+			byte[] bytes = IOUtils.toByteArray(is);
+			int pictureIdx = sheet.getWorkbook().addPicture(bytes,
+					Workbook.PICTURE_TYPE_JPEG); // 扩展名可为.jpg/.jpeg/.png
+			is.close();
+
+			HSSFPatriarch drawing = sheet.createDrawingPatriarch(); 
+			// 前面四个参数是图片偏移量
+			HSSFClientAnchor anchor = new HSSFClientAnchor(picGps.getStartX(),
+					picGps.getStartY(), picGps.getStopX(), picGps.getStopY(),
+					(short) picGps.getStartCol(), picGps.getStartRow(),
+					(short) picGps.getStopCol(), picGps.getStopRow());
+			// add a picture shape
+			anchor.setRow1(picGps.getStartRow()); // set position corner of the
+													// picture
+			anchor.setCol1(picGps.getStartCol());
+			anchor.setRow2(picGps.getStopRow());
+			anchor.setCol2(picGps.getStopCol());
+
+			drawing.createPicture(anchor, pictureIdx);
+		}
+
+	}
+	
+	
+	public static int office2PDF(String sourceFile, String destFile)
+			throws Exception {
+		try {
+			File inputFile = new File(sourceFile);
+			if (!inputFile.exists()) {
+				return -1;// 找不到源文件, 则返回-1
+			}
+
+			// 如果目标路径不存在, 则新建该路径
+			File outputFile = new File(destFile);
+			if (!outputFile.getParentFile().exists()) {
+				outputFile.getParentFile().mkdirs();
+			}
+
+			String OpenOffice_HOME = openOfficePath;// 这里是OpenOffice的安装目录
+			// 如果从文件中读取的URL地址最后一个字符不是 '\'，则添加'\'
+			if (OpenOffice_HOME.charAt(OpenOffice_HOME.length() - 1) != '/') {
+				OpenOffice_HOME += "/";
+			}
+			// 启动OpenOffice的服务
+			// String command = OpenOffice_HOME
+			// +
+			// "program/soffice -headless -accept=\"socket,host=162.249.2.241,port=8100;urp;\" -nofirststartwizard";
+			// Process pro = Runtime.getRuntime().exec(command);
+			// // connect to an OpenOffice.org instance running on port 8100
+			// OpenOfficeConnection connection = new
+			// SocketOpenOfficeConnection("162.249.2.241", 8100);
+
+			// // 启动OpenOffice的服务
+			 String command = OpenOffice_HOME
+			 +
+			 "program/soffice -headless -accept=\"socket,host=67.198.209.91,port=8100;urp;\" -nofirststartwizard";
+			 Process pro = Runtime.getRuntime().exec(command);
+			 // connect to an OpenOffice.org instance running on port 8100
+			 OpenOfficeConnection connection = new
+			 SocketOpenOfficeConnection("67.198.209.91", 8100);
+
+			// // 启动OpenOffice的服务 (window启动)
+//			String command = OpenOffice_HOME
+//					+ "program\\soffice -headless -accept=\"socket,host=192.168.1.151,port=8100;urp;\" -nofirststartwizard";
+//			Process pro = Runtime.getRuntime().exec(command);
+//			// connect to an OpenOffice.org instance running on port 8100
+//			OpenOfficeConnection connection = new SocketOpenOfficeConnection(
+//					"192.168.1.151", 8100);
+			connection.connect();
+
+			// convert
+			DocumentConverter converter = new OpenOfficeDocumentConverter(
+					connection);
+			converter.convert(inputFile, outputFile);
+			// close the connection
+			connection.disconnect();
+			// 关闭OpenOffice服务的进程
+			pro.destroy();
+			return 0;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return -1;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return 1;
+	}
+
+
+}

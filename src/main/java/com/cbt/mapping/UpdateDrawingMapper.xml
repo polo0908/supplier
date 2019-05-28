@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.UpdateDrawingDao">
+
+
+	<resultMap id="UpdateDrawingResultMap" type="com.cbt.entity.UpdateDrawing">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="drawing_id" property="drawingId" jdbcType="INTEGER" />
+		<result column="drawing_name" property="drawingName" jdbcType="VARCHAR" />
+		<result column="drawing_path" property="drawingPath" jdbcType="VARCHAR" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+
+		
+	</resultMap>
+
+	<sql id="UpdateDrawingColumnList">
+		id, drawing_id, drawing_name, drawing_path, update_time
+	</sql>
+
+	
+	<!-- 根据订单号查询图纸 -->
+	<select id="queryListByDrawingId" resultMap="UpdateDrawingResultMap"
+		parameterType="int">
+		select
+		<include refid="UpdateDrawingColumnList"/> 
+		from update_drawing    
+		where drawing_id = #{drawingId,jdbcType=INTEGER} 
+		order by update_time desc  
+	</select>
+	
+	<!-- 根据id查询图纸 -->
+	<select id="queryById" resultMap="UpdateDrawingResultMap"
+		parameterType="java.lang.Integer">
+		select 
+        <include refid="UpdateDrawingColumnList"/>
+        from update_drawing  
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	
+
+	
+	<!-- 更新图纸信息 -->
+	<update id="updateDrawing"  parameterType="com.cbt.entity.UpdateDrawing">
+		update update_drawing 
+		<set> 
+	    <if test="drawingName != null">
+			drawing_name = #{drawingName,jdbcType=VARCHAR},
+		</if>
+	    <if test="drawingPath != null">
+			drawing_path = #{drawingPath,jdbcType=VARCHAR},
+		</if>
+	    <if test="updateTime != null">
+			update_time = #{updateTime,jdbcType=TIMESTAMP},
+		</if>
+	    </set>
+		 where id = #{id,jdbcType=INTEGER}
+	</update>       
+    
+    
+    <!-- 批量插入UpdateDrawing数据 -->
+	<insert id="insertUpdateDrawings" parameterType="java.util.List">
+	    insert into update_drawing 
+		    ( drawing_id, drawing_name, drawing_path, update_time )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.drawingId},
+		    #{item.drawingName}, 
+		    #{item.drawingPath}, 
+		    #{item.updateTime}
+	      )
+	    </foreach>
+	</insert>
+	
+	
+	<!--单条插入对象  -->
+	<insert id="insertUpdateDrawing" parameterType="com.cbt.entity.UpdateDrawing">
+	    insert into update_drawing 
+	     ( drawing_id, drawing_name, drawing_path, update_time )
+	    values
+	       (
+		    #{drawingId,jdbcType=INTEGER},
+			#{drawingName,jdbcType=VARCHAR},
+			#{drawingPath,jdbcType=VARCHAR},
+			#{updateTime,jdbcType=TIMESTAMP}
+			)
+	</insert>
+	
+	<!-- 根据id删除图纸信息 -->
+	<delete id="deleteById" parameterType="int">
+	  delete from update_drawing 
+	  where drawing_id = #{drawingId,jdbcType=INTEGER}
+	</delete>
+	
+
+</mapper>

@@ -1,0 +1,220 @@
+* {
+  margin: 0;
+  padding: 0;
+  /*
+  box-sizing: border-box;
+  */
+  font-family:"Microsoft YaHei","Arial","ArialMT","SimSun";  
+  font-size: 12px;
+}
+em,
+i {
+  font-style: normal;
+}
+small {
+  font-size: 12px;
+}
+ul,
+ol {
+  list-style: none;
+}
+a {
+  text-decoration: none;
+}
+a:hover,a:focus {
+  text-decoration: none;
+}
+fieldset,
+img,
+button,
+input {
+  border: 0 none;
+  outline: none;
+}
+/*textarea,
+button,
+input,
+select,
+option {
+  outline: none;
+}*/
+Textarea {
+  border: none;
+  outline: none;
+  resize: none;
+}
+button,
+input,
+select,
+textarea {
+  font-size: 100%;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+.clearfix:before,
+.clearfix:after {
+  content: "";
+  display: table;
+}
+.clearfix:after {
+  clear: both;
+}
+.clearfix {
+  zoom: 1;
+}
+
+.offer nav{
+    width: 220px;
+    height:100%;
+    background-color:#2e363f;
+    position:fixed;
+    left:0;
+    top:0;
+}
+.offer .offer_right{
+  width: 100%;
+  height:auto;
+ /*padding:0 20px 0 240px;*/ 
+}
+.offer .info_title{
+  margin-bottom:20px;
+  margin-top:50px;
+}
+
+.info_title button{
+  width: 110px;
+  height: 30px;
+  /*line-height:30px;*/
+  background-color: #5ab75c;
+  color:#fff;
+  font-size:12px;
+  cursor:pointer;
+  float:left;
+} 
+.info_title .selects{
+  float:left;
+  position:relative;
+
+}
+.info_title input{
+  width: 216px;
+  height: 30px;
+  margin-left:5px;
+  padding-left:10px;
+  font-size:13px;
+  color:#555;
+  border:1px solid #ccc;
+}
+.offer .info_title .xl{
+  width:435px;
+  height:190px;
+  position:absolute;
+  top:29px;
+  left:5px;
+  z-index:1;
+}
+.info_title .xl ul{
+  width: 216px;
+  background-color: #fff;
+  border:1px solid #7b9dd4;
+  display:none;
+}
+.info_title .xl li{
+  width: 216px;
+  padding:0 10px 0 10px;
+  height: 20px;
+  line-height:20px;
+  position:relative;
+  cursor:pointer;
+  border-right:1px solid #7b9dd4;
+  box-sizing: border-box;
+}
+.info_title .xl span{
+}
+.info_title .xl em{
+  display:inline-block;
+  width:0;
+  border-width:6px;
+  border-style:solid;
+  border-color:transparent transparent transparent #666;
+  
+  float:right;
+
+}
+.info_title .xl .xl_l{
+  border-right-color:transparent;
+}
+.info_title .xl .xl_r{
+  position:absolute;
+  left:190px;
+  top:0;
+  height: 190px;
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+.info_details>div{
+  width:100%;
+  height:auto;
+  background-color: #fff;
+  border:1px solid #ccc;
+  padding:20px 15px;
+}
+.info_details .detail_1{
+  margin-bottom:70px;
+}
+.info_details h5{
+  font-size:14px;
+  color:#333;
+  font-weight:700;
+}
+.info_details .parameter{
+  margin-top:10px;
+}
+.parameter span{
+  display:inline-block;
+  width: 290px;
+}
+.parameter span,.parameter .options{
+  float:left;
+  font-size:14px;
+  color:#666;
+  font-family: "ArialMT";
+}
+.parameter .radio-inline{
+  float:left;
+  width: 185px;
+}
+.parameter input{
+  float:left;
+  margin-top:2px;
+  margin-right:10px;
+}
+.info .btns{
+  margin-top:20px;
+}
+.info .btns button{
+  text-align:center;
+  line-height:32px;
+  height: 32px;
+  font-size:14px;
+  color:#fff;
+  margin-right:10px;
+  cursor:pointer;
+}
+.info .btns .save{
+  width: 85px;
+  background-color: #0044cc;
+}
+.info .btns .generate{
+  width: 120px;
+  background-color: #4aafcd;
+}
+.info .btns .send{
+  width: 85px;
+  background-color: #5ab75c;
+}
+.ff4{
+	color:#ff4a4a;
+}

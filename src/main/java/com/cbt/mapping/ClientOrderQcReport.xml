@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.ClientOrderQcReportDao">
+
+	<resultMap id="ClientOrderQcReportResultMap" type="com.cbt.entity.ClientOrderQcReport">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="order_id" property="orderId" jdbcType="VARCHAR" />
+		<result column="qc_report_path" property="qcReportPath" jdbcType="VARCHAR" />
+		<result column="upload_date" property="uploadDate" jdbcType="DATE" />
+		<result column="old_or_new_qc" property="oldOrNewQc" jdbcType="VARCHAR" />
+	</resultMap> 
+
+    <sql id="ClientOrderQcReportColumnList">
+		id, order_id, qc_report_path, upload_date, old_or_new_qc
+	</sql>   
+
+    
+    <!-- 根据order id查询 -->
+    <select id="queryByClientOrderId" resultMap="ClientOrderQcReportResultMap" parameterType="string">
+          select 
+          <include refid="ClientOrderQcReportColumnList"/> 
+          from client_order_qcReport 
+          where order_id = #{orderId,jdbcType=VARCHAR}  order by upload_date desc     
+    </select>
+    
+    
+    <!-- 根据id查询 -->
+    <select id="queryById" parameterType="int" resultType="string">
+          select qc_report_path from client_order_qcReport where id = #{id,jdbcType=INTEGER} 
+    </select>
+    
+    	
+	<!-- 	   批量插入qc报告-->
+	<insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+	    insert into client_order_qcReport 
+		    (
+		    order_id, qc_report_path,upload_date,old_or_new_qc
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.orderId},#{item.qcReportPath},#{item.uploadDate},#{item.oldOrNewQc}
+	      )
+	    </foreach>
+	    
+	    <selectKey resultType="int"  order="AFTER"  keyProperty="id">
+            SELECT LAST_INSERT_ID()  AS  id	    
+	    </selectKey>
+	</insert>
+    
+    
+    	    	<!-- 插入qc报告-->
+	<insert id="insert" parameterType="com.cbt.entity.ClientOrderQcReport" useGeneratedKeys="true" keyProperty="id">
+	    insert into client_order_qcReport 
+		    (
+		    order_id, qc_report_path,upload_date,old_or_new_qc 
+            )
+	    values
+	    
+	      (           
+		     #{orderId,jdbcType=VARCHAR},#{qcReportPath,jdbcType=VARCHAR},
+		     #{uploadDate,jdbcType=DATE},#{oldOrNewQc,jdbcType=VARCHAR} 
+	      )
+	</insert>
+    
+    
+    
+    
+    <!-- 删除 -->
+    <delete id="deleteById" parameterType="int">
+       delete from client_order_qcReport where id = #{id,jdbcType=INTEGER}        
+    </delete>
+    
+    
+    
+    
+    
+	
+</mapper>

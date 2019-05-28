@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.InvoicePaymentRemarkDao">
+
+	<resultMap id="InvoicePaymentRemarkResultMap" type="com.cbt.entity.InvoicePaymentRemark">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="factort_id" property="factortId" jdbcType="VARCHAR" />
+		<result column="payment_remark" property="paymentRemark" jdbcType="LONGVARCHAR" />
+
+	</resultMap> 
+
+	<!-- 根据工厂查询发票备注 -->
+    <select id="queryRemarkByFactoryId" resultMap="InvoicePaymentRemarkResultMap">
+          select id,factory_id,payment_remark
+          from invoice_payment_remark
+          where factory_id = #{factoryId,jdbcType=VARCHAR} 
+    </select>
+    
+
+    <update id="updateRemarkByFactoryId" parameterType="com.cbt.entity.InvoicePaymentRemark">
+          update invoice_payment_remark
+          <set>
+             <if test="paymentRemark != null">
+			  payment_remark = #{paymentRemark,jdbcType=LONGVARCHAR},
+		     </if>                  
+          </set>
+          where id = #{id,jdbcType=INTEGER}
+    </update>
+	
+</mapper>

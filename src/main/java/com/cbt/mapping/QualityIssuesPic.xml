@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.QualityIssuesPicDao">
+
+	<resultMap id="QualityIssuesPicMap" type="com.cbt.entity.QualityIssuesPic">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="order_message_id" property="orderMessageId" jdbcType="INTEGER" />
+		<result column="picture_path" property="picturePath" jdbcType="VARCHAR" />
+		<result column="picture_path_compress" property="picturePathCompress" jdbcType="VARCHAR" />
+	</resultMap> 
+	
+	
+
+    <sql id="QualityIssuesPicColumnList">
+	    id,order_message_id,picture_path,picture_path_compress
+    </sql>
+
+	<!-- 查询客户的消息 -->
+    <select id="queryByOrderMessageId" resultMap="QualityIssuesPicMap" resultType="int">
+          select
+          <include refid="QualityIssuesPicColumnList"/>
+          from quality_issues_pic
+          where order_message_id = #{orderMessageId,jdbcType=INTEGER}
+    </select>
+
+	<!-- 批量插入图片 -->
+	<insert id="insert" parameterType="java.util.List">
+	    insert into quality_issues_pic 
+		    (
+		    order_message_id,picture_path
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.orderMessageId},#{item.picturePath}
+	      )
+	    </foreach>
+	</insert>	
+</mapper>

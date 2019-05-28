@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cbt.dao.MessageLogTabMapper">
+  <resultMap id="BaseResultMap" type="com.cbt.entity.MessageLogTab">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="sale_name" jdbcType="VARCHAR" property="saleName" />
+    <result column="userid" jdbcType="VARCHAR" property="userid" />
+    <result column="message_type" jdbcType="INTEGER" property="messageType" />
+    <result column="order_id" jdbcType="VARCHAR" property="orderId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, sale_name, userid, message_type, order_id, create_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from message_log_tab
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from message_log_tab
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.cbt.entity.MessageLogTab">
+    insert into message_log_tab (id, sale_name, userid, 
+      message_type, order_id, create_time
+      )
+    values (#{id,jdbcType=INTEGER}, #{saleName,jdbcType=VARCHAR}, #{userid,jdbcType=VARCHAR}, 
+      #{messageType,jdbcType=INTEGER}, #{orderId,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.cbt.entity.MessageLogTab">
+    insert into message_log_tab
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="saleName != null">
+        sale_name,
+      </if>
+      <if test="userid != null">
+        userid,
+      </if>
+      <if test="messageType != null">
+        message_type,
+      </if>
+      <if test="orderId != null">
+        order_id,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="saleName != null">
+        #{saleName,jdbcType=VARCHAR},
+      </if>
+      <if test="userid != null">
+        #{userid,jdbcType=VARCHAR},
+      </if>
+      <if test="messageType != null">
+        #{messageType,jdbcType=INTEGER},
+      </if>
+      <if test="orderId != null">
+        #{orderId,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.cbt.entity.MessageLogTab">
+    update message_log_tab
+    <set>
+      <if test="saleName != null">
+        sale_name = #{saleName,jdbcType=VARCHAR},
+      </if>
+      <if test="userid != null">
+        userid = #{userid,jdbcType=VARCHAR},
+      </if>
+      <if test="messageType != null">
+        message_type = #{messageType,jdbcType=INTEGER},
+      </if>
+      <if test="orderId != null">
+        order_id = #{orderId,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.cbt.entity.MessageLogTab">
+    update message_log_tab
+    set sale_name = #{saleName,jdbcType=VARCHAR},
+      userid = #{userid,jdbcType=VARCHAR},
+      message_type = #{messageType,jdbcType=INTEGER},
+      order_id = #{orderId,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

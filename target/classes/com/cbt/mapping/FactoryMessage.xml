@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.FactoryMessageDao">
+
+	<resultMap id="FactoryMessageResultMap" type="com.cbt.entity.FactoryMessage">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="order_message_id" property="orderMessageId" jdbcType="INTEGER" />
+		<result column="factory_message_send_time" property="factoryMessageSendTime" jdbcType="VARCHAR" />
+		<result column="factory_message_details" property="factoryMessageDetails" jdbcType="VARCHAR" />
+		<result column="sales_id" property="salesId" jdbcType="VARCHAR" />
+		<result column="read_status" property="readStatus" jdbcType="INTEGER" />
+		<result column="message_read_time" property="messageReadTime" jdbcType="TIMESTAMP" />
+	</resultMap> 
+	
+	
+
+    <sql id="FactoryMessageColumnList">
+	    id,order_message_id,factory_message_send_time,factory_message_details,sales_id,
+	    read_status,message_read_time
+    </sql>
+
+
+    <select id="queryByOrderMessageId" resultMap="FactoryMessageResultMap" parameterType="int">
+         select 
+         <include refid="FactoryMessageColumnList"/>
+         from factory_message
+         where order_message_id =  #{orderMessageId,jdbcType=INTEGER}
+    </select>
+
+
+
+      <!-- 插入消息 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+      insert into factory_message
+       (
+        order_message_id,factory_message_send_time,factory_message_details,sales_id,
+	    read_status,message_read_time
+       )
+       values
+       (
+       #{orderMessageId,jdbcType=INTEGER},
+       #{factoryMessageSendTime,jdbcType=VARCHAR},
+       #{factoryMessageDetails,jdbcType=VARCHAR},
+       #{salesId,jdbcType=VARCHAR},
+       #{readStatus,jdbcType=INTEGER},
+       #{messageReadTime,jdbcType=TIMESTAMP}
+       )      
+    </insert>	
+    
+    
+    
+    <!-- 更新图纸信息 -->
+	<update id="updateMessage"  parameterType="com.cbt.entity.MessageCenter">
+		update factory_message 
+		<set> 
+	    <if test="readStatus != null">
+			read_status = #{readStatus,jdbcType=INTEGER},
+		</if>
+        <if test="messageReadTime != null">
+			message_read_time = #{messageReadTime,jdbcType=TIMESTAMP},
+        </if>
+	    </set>
+		 where id = #{id,jdbcType=INTEGER}
+	</update>        
+</mapper>

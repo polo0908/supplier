@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.ClientOrderPoDao">
+
+	<resultMap id="ClientOrderPoResultMap" type="com.cbt.entity.ClientOrderPo">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="order_id" property="orderId" jdbcType="VARCHAR" />
+		<result column="po_path" property="poPath" jdbcType="VARCHAR" />
+		<result column="upload_date" property="uploadDate" jdbcType="DATE" />
+		<result column="old_or_new_po" property="oldOrNewPo" jdbcType="VARCHAR" />
+	</resultMap> 
+
+    <sql id="ClientOrderPoColumnList">
+		id, order_id, po_path, upload_date, old_or_new_po
+	</sql>   
+
+    
+    <!-- 根据order id查询 -->
+    <select id="queryByClientOrderId" resultMap="ClientOrderPoResultMap" parameterType="string">
+          select 
+          <include refid="ClientOrderPoColumnList"/> 
+          from client_order_po 
+          where order_id = #{orderId,jdbcType=VARCHAR}  order by upload_date desc     
+    </select>
+    
+    
+    <!-- 根据id查询 -->
+    <select id="queryById" parameterType="int" resultType="string">
+          select po_path from client_order_po where id = #{id,jdbcType=INTEGER} 
+    </select>
+    
+    	
+	<!-- 	   批量插入po报告-->
+	<insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+	    insert into client_order_po 
+		    (
+		    order_id, po_path, upload_date, old_or_new_po
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.orderId},#{item.poPath},#{item.uploadDate},#{item.oldOrNewPo}
+	      )
+	    </foreach>
+	    
+	    <selectKey resultType="int"  order="AFTER"  keyProperty="id">
+            SELECT LAST_INSERT_ID()  AS  id	    
+	    </selectKey>
+	</insert>
+    
+    
+    	    	<!-- 插入po报告-->
+	<insert id="insert" parameterType="com.cbt.entity.ClientOrderPo" useGeneratedKeys="true" keyProperty="id">
+	    insert into client_order_po 
+		    (
+		    order_id, po_path, upload_date, old_or_new_po
+            )
+	    values
+	    
+	      (           
+		     #{orderId,jdbcType=VARCHAR},#{poPath,jdbcType=VARCHAR},
+		     #{uploadDate,jdbcType=DATE},#{oldOrNewPo,jdbcType=VARCHAR} 
+	      )
+	</insert>
+    
+    
+    
+    
+    <!-- 删除 -->
+    <delete id="deleteById" parameterType="int">
+       delete from client_order_po where id = #{id,jdbcType=INTEGER}        
+    </delete>
+    
+    
+    
+    
+    
+	
+</mapper>

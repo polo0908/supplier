@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.MilestoneDao">
+
+	<resultMap id="MilestoneMap" type="com.cbt.entity.Milestone">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="order_id" property="orderId" jdbcType="VARCHAR" />
+		<result column="milestone_date" property="milestoneDate" jdbcType="DATE" />
+		<result column="milestone_name" property="milestoneName" jdbcType="VARCHAR" />
+		<result column="delay_status" property="delayStatus" jdbcType="INTEGER" />
+		<result column="delay_date" property="delayDate" jdbcType="DATE" />
+		<result column="delay_remark" property="delayRemark" jdbcType="LONGVARCHAR" />
+		<result column="production_photo_status" property="productionPhotoStatus" jdbcType="INTEGER" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="photoes_remark" property="photoesRemark" jdbcType="LONGVARCHAR" />
+		<result column="expected_or_actually" property="expectedOrActually" jdbcType="INTEGER" />
+	</resultMap> 
+
+	<sql id="MilestoneColumnList">
+		id, order_id, milestone_date, milestone_name, delay_status, delay_date,
+		delay_remark, production_photo_status, create_time, photoes_remark,expected_or_actually
+	</sql>
+
+        <!-- 根据orderId查询 (显示2个月内的里程碑记录)-->
+    <select id="queryByOrderId" resultMap="MilestoneMap" parameterType="string">
+          select 
+          <include refid="MilestoneColumnList"/>
+          from milestone  where order_id = #{orderId,jdbcType=VARCHAR}
+<!--           and milestone_date &gt;  -->
+<!--           (DATE_SUB((select Max(milestone_date) as date from milestone where order_id = #{orderId,jdbcType=VARCHAR}),INTERVAL 4 MONTH))           -->
+          ORDER BY milestone_date  
+    </select>
+    
+        <!-- 根据id查询 -->
+    <select id="queryById" resultMap="MilestoneMap" parameterType="int">
+          select 
+          <include refid="MilestoneColumnList"/>
+          from milestone  where id = #{id,jdbcType=INTEGER}  
+    </select>
+        <!-- 根据里程碑名字查询 -->
+    <select id="queryByName" resultMap="MilestoneMap">
+          select 
+          <include refid="MilestoneColumnList"/>
+          from milestone  where milestone_name = #{milestoneName,jdbcType=VARCHAR}  
+          and order_id = #{orderId,jdbcType=VARCHAR} 
+          and expected_or_actually = #{expectedOrActually,jdbcType=INTEGER} 
+    </select>
+    
+    <!-- 插入里程碑 -->
+    <insert id="insert" parameterType="com.cbt.entity.Milestone" useGeneratedKeys="true" keyProperty="id">
+           insert into milestone
+           (
+           order_id, milestone_date,
+           milestone_name, delay_status,
+           delay_date,delay_remark,
+           production_photo_status, create_time,expected_or_actually           
+           )
+           values
+           (
+           #{orderId,jdbcType=VARCHAR},
+           #{milestoneDate,jdbcType=DATE},
+           #{milestoneName,jdbcType=VARCHAR},
+           #{delayStatus,jdbcType=INTEGER},
+           #{delayDate,jdbcType=VARCHAR},
+           #{delayRemark,jdbcType=LONGVARCHAR},
+           #{productionPhotoStatus,jdbcType=INTEGER},
+           #{createTime,jdbcType=TIMESTAMP},
+           #{expectedOrActually,jdbcType=INTEGER}
+           )
+    </insert>
+    
+    
+        <!-- 更新milestone数据 -->
+    <update id="updateMilestone" parameterType="com.cbt.entity.Milestone">
+	    update milestone 
+		<set> 
+	    <if test="milestoneDate != null">
+			milestone_date = #{milestoneDate,jdbcType=DATE},
+		</if>
+	    <if test="milestoneName != null">
+			milestone_name = #{milestoneName,jdbcType=VARCHAR},
+		</if>
+	    <if test="delayStatus != null">
+			delay_status = #{delayStatus,jdbcType=INTEGER},
+		</if>
+	    <if test="delayDate != null">
+			delay_date = #{delayDate,jdbcType=DATE},
+		</if>
+	    <if test="delayRemark != null">
+			delay_remark = #{delayRemark,jdbcType=LONGVARCHAR},
+		</if>
+	    <if test="productionPhotoStatus != null">
+			production_photo_status = #{productionPhotoStatus,jdbcType=INTEGER},
+		</if>
+	    <if test="productionPhotoStatus != null">
+			photoes_remark = #{photoesRemark,jdbcType=LONGVARCHAR},
+		</if>
+       </set>
+        where id = #{id,jdbcType=INTEGER}	 
+    </update>
+    
+    <!-- 根据id删除里程碑-->
+    <delete id="delete" parameterType="int">
+        delete from milestone 
+        where id = #{id,jdbcType=INTEGER}   
+    </delete>
+    
+</mapper>

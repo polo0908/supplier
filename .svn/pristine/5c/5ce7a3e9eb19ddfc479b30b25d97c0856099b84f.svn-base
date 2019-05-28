@@ -1,0 +1,19 @@
+#\u65e7\u7684\u56fe\u7eb8\u4e0a\u4f20\u4e0b\u8f7d\u8def\u5f84
+sendMailPath = http://112.64.174.34:43887/NBEmail/helpServlet?action=SendEmail&className=ExternalInterfaceServlet
+#sendMailPath = http://192.168.1.62:8080/NBEmail/helpServlet?action=SendEmail&className=ExternalInterfaceServlet
+
+sendMailPath_save = http://112.64.174.34:43887/NBEmail/helpServlet?action=CrmSendEmail&className=EmailReceiverServlet
+
+#sendMailPath_save = http://192.168.1.62:8080/NBEmail/helpServlet?action=CrmSendEmail&className=ExternalInterfaceServlet
+
+domainName = http://www.importx.com
+
+#quotationAttr = http://192.168.1.54:8099/crm/account/tempUserLogin.do
+quotationAttr = http://www.importx.com/crm/account/tempUserLogin.do
+
+
+#inviteLogin = http://192.168.1.62:8080/NBEmail/helpServlet?action=inviteLogin&className=ExternalInterfaceServlet
+
+inviteLogin = http://112.64.174.34:43887/NBEmail/helpServlet?action=inviteLogin&className=ExternalInterfaceServlet
+
+

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbt.dao.ReOrderDrawingsDao">
+
+
+	<resultMap id="ReOrderDrawingsResultMap" type="com.cbt.entity.ReOrderDrawings">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="reOrder_id" property="reOrderId" jdbcType="INTEGER" />
+		<result column="userid" property="userId" jdbcType="VARCHAR" />
+		<result column="old_order" property="oldOrderId" jdbcType="INTEGER" />
+		<result column="project_name" property="projectName" jdbcType="VARCHAR" />
+		<result column="drawings_path" property="drawingsPath" jdbcType="VARCHAR" />
+		<result column="drawings_name" property="drawingsName" jdbcType="VARCHAR" />
+		<result column="quantity" property="quantity" jdbcType="INTEGER" />
+		<result column="unit_Price" property="unitPrice" jdbcType="DOUBLE" />
+		<result column="mold_price" property="moldPrice" jdbcType="DOUBLE" />
+		<result column="drawing_state" property="drawingState" jdbcType="VARCHAR" />
+		<result column="product_name" property="productName" jdbcType="VARCHAR" />
+		<result column="shipping_fee" property="shippingFee" jdbcType="DOUBLE" />
+		<result column="status" property="status" jdbcType="VARCHAR" />
+		<result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<sql id="ReOrderDrawingsColumnList">
+		id, reOrder_id, userid, old_order, project_name, drawings_path,
+		drawings_name,
+	    quantity,unit_Price, mold_price, drawing_state,product_name,status,update_time
+	</sql>
+    <!-- 根据reOrderId查询图纸详情 -->
+    <select id="queryReOrderDrawings" parameterType="int" resultMap="ReOrderDrawingsResultMap">
+      select 
+      <include refid="ReOrderDrawingsColumnList" /> 
+      from reorder_drawing  
+      where reOrder_id = #{reOrderId,jdbcType=INTEGER}    
+    </select>
+    
+    	<!-- 根据id查询新图纸信息 -->
+	<select id="queryById" resultMap="ReOrderDrawingsResultMap" parameterType="int">
+	   select 
+	   <include refid="ReOrderDrawingsColumnList" /> 
+	   from reorder_drawing  
+	   where id = #{id,jdbcType=INTEGER}
+	</select>
+	
+		<!-- 多个id查询图纸 -->
+	<select id="queryByIds" resultMap="ReOrderDrawingsResultMap"
+	    parameterType="java.lang.Integer">
+	    select
+	    <include refid="ReOrderDrawingsColumnList"/> 
+	    from reorder_drawing
+	    where id in
+	    <foreach collection="array" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</select>
+	
+	    <!-- 批量插入数据 -->
+	<insert id="insertReOrderDrawings" parameterType="java.util.List">
+	    insert into reorder_drawing 
+		    (
+		    reOrder_id, 
+		    drawings_path, 
+			drawings_name,  
+		    quantity,
+			unit_Price, mold_price, drawing_state,product_name,status 
+            )
+	    values
+	    <foreach collection="list" item="item" index="index" separator=",">
+	      (           
+		    #{item.reOrderId},
+		    #{item.drawingsPath},
+		    #{item.drawingsName}, 
+		    #{item.quantity},
+		    #{item.unitPrice},#{item.moldPrice},#{item.drawingState},#{item.productName},#{item.status}
+	      )
+	    </foreach>
+	  </insert>
+	
+	 <!-- 单条插入reorderDrawing数据 -->
+	<insert id="insertReOrderDrawing" parameterType="com.cbt.entity.ReOrderDrawings">
+	    insert into reorder_drawing 
+		    (
+		    reOrder_id, 
+		    drawings_path, 
+			drawings_name,  
+		    quantity,
+			unit_Price, mold_price, drawing_state,product_name,status 
+            )
+	    values	    
+	      (  
+	            #{reOrderId,jdbcType=INTEGER},		    
+                #{drawingsPath,jdbcType=VARCHAR},
+				#{drawingsName,jdbcType=VARCHAR},
+				#{quantity,jdbcType=INTEGER},
+				#{unitPrice,jdbcType=DOUBLE},
+				#{moldPrice,jdbcType=DOUBLE},
+				#{drawingState,jdbcType=VARCHAR},
+				#{productName,jdbcType=VARCHAR},
+				#{status,jdbcType=VARCHAR}
+   
+	      )
+	</insert>
+	
+	<!-- 根据Id删除 -->
+	<delete id="deleteReOrderDrawing" parameterType="int">
+	  delete from reorder_drawing  
+	  where id = #{id,jdbcType=INTEGER}
+	
+	</delete>
+	
+	<!-- 更新图纸信息 -->
+	<update id="updateReOrderDrawing"  parameterType="com.cbt.entity.ReOrderDrawings">
+		update reorder_drawing 
+		<set> 
+		<if test="quantity != null">
+			quantity = #{quantity,jdbcType=INTEGER},
+		</if>
+	    <if test="status != null">
+			status = #{status,jdbcType=VARCHAR},
+		</if>
+	    <if test="drawingsName != null">
+			mold_price = #{moldPrice,jdbcType=DOUBLE},
+		</if>
+	    <if test="unitPrice != null">
+			unit_price = #{unitPrice,jdbcType=DOUBLE},
+		</if>
+	    <if test="productName != null">
+			product_name = #{productName,jdbcType=VARCHAR},
+		</if>
+	    <if test="drawingsName != null">
+			drawings_name = #{drawingsName,jdbcType=VARCHAR},
+		</if>
+	    <if test="drawingState != null">
+			drawing_state = #{drawingState,jdbcType=VARCHAR},
+		</if>
+	    <if test="updateTime != null">
+			update_time = #{updateTime,jdbcType=TIMESTAMP},
+		</if>
+	    </set>
+		 where id = #{id,jdbcType=INTEGER}
+	</update>       
+	
+</mapper>
